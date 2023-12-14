@@ -1,0 +1,15 @@
+name: Load Data Function
+description: Load data from local dataset
+
+outputs:
+- {name: Data, type: LocalPath, description: 'Path where data will be stored.'}
+
+implementation:
+  container:
+    image: pax7898/CustomerBehaviorPrediction/load_data
+    command: [
+      python, load_data.py,
+
+      --data,
+      {outputPath: Data},
+    ]
