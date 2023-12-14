@@ -3,14 +3,7 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="$USER_HOME$/Downloads/online_shoppers_intention.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/load_data/diabetes.csv">
+        <entry key="/pipeline/load_data/customer_intention.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

@@ -9,9 +9,9 @@ from sklearn.model_selection import train_test_split
 def _load_data(args):
 
     # Gets and split dataset
-    df = pd.read_csv('diabetes.csv')
-    y = df['Outcome']
-    x = df.drop('Outcome', axis=1)
+    df = pd.read_csv('customer_intention.csv')
+    y = df['Revenue']
+    x = df.drop('Revenue', axis=1)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
     x_train, x_test, y_train, y_test = x_train.to_numpy(), x_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
 
@@ -29,7 +29,7 @@ def _load_data(args):
 if __name__ == '__main__':
     
     # This component does not receive any input
-    # it only outpus one artifact which is `data`.
+    # it only outputs one artifact which is `data`.
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str)
     
