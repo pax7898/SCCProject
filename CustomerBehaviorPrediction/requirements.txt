@@ -1,0 +1,5 @@
+kfp==1.8.22
+streamlit
+pandas
+numpy
+scikit-learn
