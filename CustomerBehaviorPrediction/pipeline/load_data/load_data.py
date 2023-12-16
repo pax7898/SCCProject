@@ -9,11 +9,13 @@ from sklearn.model_selection import train_test_split
 def _load_data(args):
 
     # Gets and split dataset
-    df = pd.read_csv('customer_intention.csv')
-    y = df['Revenue']
-    x = df.drop('Revenue', axis=1)
+    df = pd.read_csv('ecommerce_customers.csv')
+    df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
+
+    x = df.drop('Yearly Amount Spent', axis=1)
+    y = df['Yearly Amount Spent']
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    x_train, x_test, y_train, y_test = x_train.to_numpy(), x_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
+
 
     # Creates `data` structure to save and 
     # share train and test datasets.
