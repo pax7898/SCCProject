@@ -6,7 +6,7 @@ outputs:
 
 implementation:
   container:
-    image: pax7898/CustomerBehaviorPrediction/pipeline/load_data
+    image: pax7898/load_data
     command: [
       python, load_data.py,
 

@@ -8,7 +8,7 @@ outputs:
 
 implementation:
   container:
-    image: pax7898/customer_behavior_prediction/pipeline/linear_regression
+    image: pax7898/linear_regression
     command: [
       python, linear_regression.py,
 
