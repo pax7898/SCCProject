@@ -1,0 +1,123 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: customer-pipeline-
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-16T18:25:47.052389',
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
+      for Customer Spends predicition.", "name": "Customer Pipeline"}'}
+  labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
+spec:
+  entrypoint: customer-pipeline
+  templates:
+  - name: customer-pipeline
+    dag:
+      tasks:
+      - name: linear-regression-classifier
+        template: linear-regression-classifier
+        dependencies: [load-data-function]
+        arguments:
+          artifacts:
+          - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
+      - {name: load-data-function, template: load-data-function}
+      - name: show-results
+        template: show-results
+        dependencies: [linear-regression-classifier]
+        arguments:
+          parameters:
+          - {name: linear-regression-classifier-Accuracy, value: '{{tasks.linear-regression-classifier.outputs.parameters.linear-regression-classifier-Accuracy}}'}
+  - name: linear-regression-classifier
+    container:
+      args: []
+      command: [python, linear_regression.py, --data, /tmp/inputs/Data/data, --accuracy,
+        /tmp/outputs/Accuracy/data]
+      image: pax7898/linear_regression
+    inputs:
+      artifacts:
+      - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
+    outputs:
+      parameters:
+      - name: linear-regression-classifier-Accuracy
+        valueFrom: {path: /tmp/outputs/Accuracy/data}
+      artifacts:
+      - {name: linear-regression-classifier-Accuracy, path: /tmp/outputs/Accuracy/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
+          a Linear Regression Classifier", "implementation": {"container": {"command":
+          ["python", "linear_regression.py", "--data", {"inputPath": "Data"}, "--accuracy",
+          {"outputPath": "Accuracy"}], "image": "pax7898/linear_regression"}}, "inputs":
+          [{"description": "Path where data is stored.", "name": "Data", "type": "LocalPath"}],
+          "name": "Linear Regression Classifier", "outputs": [{"description": "Accuracy
+          metric", "name": "Accuracy", "type": "Float"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "ce473f55716449a2ef14bbf58257536c266122f1c0a441f748d027070231b765", "url":
+          "CustomerBehaviorPrediction/pipeline/linear_regression/linear_regression.yaml"}'}
+  - name: load-data-function
+    container:
+      args: []
+      command: [python, load_data.py, --data, /tmp/outputs/Data/data]
+      image: pax7898/CustomerBehaviorPrediction/pipeline/load_data
+    outputs:
+      artifacts:
+      - {name: load-data-function-Data, path: /tmp/outputs/Data/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Load
+          data from local dataset", "implementation": {"container": {"command": ["python",
+          "load_data.py", "--data", {"outputPath": "Data"}], "image": "pax7898/CustomerBehaviorPrediction/pipeline/load_data"}},
+          "name": "Load Data Function", "outputs": [{"description": "Path where data
+          will be stored.", "name": "Data", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "84f0c0616c3028348f913201408f1085d8496607b3dc54579e4248db2d7bf061", "url":
+          "CustomerBehaviorPrediction/pipeline/load_data/load_data.yaml"}'}
+  - name: show-results
+    container:
+      args: [--linear-regression, '{{inputs.parameters.linear-regression-classifier-Accuracy}}']
+      command:
+      - sh
+      - -ec
+      - |
+        program_path=$(mktemp)
+        printf "%s" "$0" > "$program_path"
+        python3 -u "$program_path" "$@"
+      - |
+        def show_results(linear_regression):
+            # Given the outputs from linear regression components
+            # the results are shown.
+
+            print(f"Linear regression (accuracy): {linear_regression}")
+
+        import argparse
+        _parser = argparse.ArgumentParser(prog='Show results', description='')
+        _parser.add_argument("--linear-regression", dest="linear_regression", type=float, required=True, default=argparse.SUPPRESS)
+        _parsed_args = vars(_parser.parse_args())
+
+        _outputs = show_results(**_parsed_args)
+      image: python:3.7
+    inputs:
+      parameters:
+      - {name: linear-regression-classifier-Accuracy}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"implementation": {"container":
+          {"args": ["--linear-regression", {"inputValue": "linear_regression"}], "command":
+          ["sh", "-ec", "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3
+          -u \"$program_path\" \"$@\"\n", "def show_results(linear_regression):\n    #
+          Given the outputs from linear regression components\n    # the results are
+          shown.\n\n    print(f\"Linear regression (accuracy): {linear_regression}\")\n\nimport
+          argparse\n_parser = argparse.ArgumentParser(prog=''Show results'', description='''')\n_parser.add_argument(\"--linear-regression\",
+          dest=\"linear_regression\", type=float, required=True, default=argparse.SUPPRESS)\n_parsed_args
+          = vars(_parser.parse_args())\n\n_outputs = show_results(**_parsed_args)\n"],
+          "image": "python:3.7"}}, "inputs": [{"name": "linear_regression", "type":
+          "Float"}], "name": "Show results"}', pipelines.kubeflow.org/component_ref: '{}',
+        pipelines.kubeflow.org/arguments.parameters: '{"linear_regression": "{{inputs.parameters.linear-regression-classifier-Accuracy}}"}'}
+  arguments:
+    parameters: []
+  serviceAccountName: pipeline-runner
