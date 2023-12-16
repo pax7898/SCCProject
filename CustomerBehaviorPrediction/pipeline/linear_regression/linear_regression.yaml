@@ -4,7 +4,7 @@ description: Trains a Linear Regression Classifier
 inputs:
 - {name: Data, type: LocalPath, description: 'Path where data is stored.'}
 outputs:
-- {name: Accuracy, type: Float, description: 'Accuracy metric'}
+- {name: Mae, type: Float, description: 'Mean Absolute Error metric'}
 
 implementation:
   container:
@@ -16,6 +16,6 @@ implementation:
       {inputPath: Data},
 
       --accuracy,
-      {outputPath: Accuracy},
+      {outputPath: Mae},
 
     ]
