@@ -15,7 +15,7 @@ def _load_data(args):
     x = df.drop('Yearly Amount Spent', axis=1)
     y = df['Yearly Amount Spent']
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-
+    x_train, x_test, y_train, y_test = x_train.to_numpy(), x_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
 
     # Creates `data` structure to save and 
     # share train and test datasets.

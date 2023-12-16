@@ -31,4 +31,4 @@ def customers_pipeline():
 
 
 if __name__ == '__main__':
-    kfp.compiler.Compiler().compile(customers_pipeline, 'customers_pipeline.yaml')
+    kfp.compiler.Compiler().compile(customers_pipeline, 'CustomerBehaviorPrediction/pipeline/customers_pipeline.yaml')

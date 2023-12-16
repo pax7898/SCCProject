@@ -15,7 +15,7 @@ implementation:
       --data,
       {inputPath: Data},
 
-      --accuracy,
+      --mae,
       {outputPath: Mae},
 
     ]

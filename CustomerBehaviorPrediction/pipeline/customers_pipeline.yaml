@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: customer-pipeline-
-  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-16T18:25:47.052389',
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-16T18:39:19.130326',
     pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
       for Customer Spends predicition.", "name": "Customer Pipeline"}'}
   labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
@@ -24,22 +24,22 @@ spec:
         dependencies: [linear-regression-classifier]
         arguments:
           parameters:
-          - {name: linear-regression-classifier-Accuracy, value: '{{tasks.linear-regression-classifier.outputs.parameters.linear-regression-classifier-Accuracy}}'}
+          - {name: linear-regression-classifier-Mae, value: '{{tasks.linear-regression-classifier.outputs.parameters.linear-regression-classifier-Mae}}'}
   - name: linear-regression-classifier
     container:
       args: []
-      command: [python, linear_regression.py, --data, /tmp/inputs/Data/data, --accuracy,
-        /tmp/outputs/Accuracy/data]
+      command: [python, linear_regression.py, --data, /tmp/inputs/Data/data, --mae,
+        /tmp/outputs/Mae/data]
       image: pax7898/linear_regression
     inputs:
       artifacts:
       - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
     outputs:
       parameters:
-      - name: linear-regression-classifier-Accuracy
-        valueFrom: {path: /tmp/outputs/Accuracy/data}
+      - name: linear-regression-classifier-Mae
+        valueFrom: {path: /tmp/outputs/Mae/data}
       artifacts:
-      - {name: linear-regression-classifier-Accuracy, path: /tmp/outputs/Accuracy/data}
+      - {name: linear-regression-classifier-Mae, path: /tmp/outputs/Mae/data}
     metadata:
       labels:
         pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
@@ -47,18 +47,18 @@ spec:
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
           a Linear Regression Classifier", "implementation": {"container": {"command":
-          ["python", "linear_regression.py", "--data", {"inputPath": "Data"}, "--accuracy",
-          {"outputPath": "Accuracy"}], "image": "pax7898/linear_regression"}}, "inputs":
+          ["python", "linear_regression.py", "--data", {"inputPath": "Data"}, "--mae",
+          {"outputPath": "Mae"}], "image": "pax7898/linear_regression"}}, "inputs":
           [{"description": "Path where data is stored.", "name": "Data", "type": "LocalPath"}],
-          "name": "Linear Regression Classifier", "outputs": [{"description": "Accuracy
-          metric", "name": "Accuracy", "type": "Float"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
-          "ce473f55716449a2ef14bbf58257536c266122f1c0a441f748d027070231b765", "url":
+          "name": "Linear Regression Classifier", "outputs": [{"description": "Mean
+          Absolute Error metric", "name": "Mae", "type": "Float"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "cffd55da83f32363be76994b1a91cdb0c7263056b75a9cb87ea70556fc46555b", "url":
           "CustomerBehaviorPrediction/pipeline/linear_regression/linear_regression.yaml"}'}
   - name: load-data-function
     container:
       args: []
       command: [python, load_data.py, --data, /tmp/outputs/Data/data]
-      image: pax7898/CustomerBehaviorPrediction/pipeline/load_data
+      image: pax7898/load_data
     outputs:
       artifacts:
       - {name: load-data-function-Data, path: /tmp/outputs/Data/data}
@@ -69,14 +69,14 @@ spec:
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Load
           data from local dataset", "implementation": {"container": {"command": ["python",
-          "load_data.py", "--data", {"outputPath": "Data"}], "image": "pax7898/CustomerBehaviorPrediction/pipeline/load_data"}},
+          "load_data.py", "--data", {"outputPath": "Data"}], "image": "pax7898/load_data"}},
           "name": "Load Data Function", "outputs": [{"description": "Path where data
           will be stored.", "name": "Data", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
-          "84f0c0616c3028348f913201408f1085d8496607b3dc54579e4248db2d7bf061", "url":
+          "bad9c0b5b37a27ca151d5f04636cd8098299baa3e9036a5924c96bbbea97b359", "url":
           "CustomerBehaviorPrediction/pipeline/load_data/load_data.yaml"}'}
   - name: show-results
     container:
-      args: [--linear-regression, '{{inputs.parameters.linear-regression-classifier-Accuracy}}']
+      args: [--linear-regression, '{{inputs.parameters.linear-regression-classifier-Mae}}']
       command:
       - sh
       - -ec
@@ -100,7 +100,7 @@ spec:
       image: python:3.7
     inputs:
       parameters:
-      - {name: linear-regression-classifier-Accuracy}
+      - {name: linear-regression-classifier-Mae}
     metadata:
       labels:
         pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
@@ -117,7 +117,7 @@ spec:
           = vars(_parser.parse_args())\n\n_outputs = show_results(**_parsed_args)\n"],
           "image": "python:3.7"}}, "inputs": [{"name": "linear_regression", "type":
           "Float"}], "name": "Show results"}', pipelines.kubeflow.org/component_ref: '{}',
-        pipelines.kubeflow.org/arguments.parameters: '{"linear_regression": "{{inputs.parameters.linear-regression-classifier-Accuracy}}"}'}
+        pipelines.kubeflow.org/arguments.parameters: '{"linear_regression": "{{inputs.parameters.linear-regression-classifier-Mae}}"}'}
   arguments:
     parameters: []
   serviceAccountName: pipeline-runner
