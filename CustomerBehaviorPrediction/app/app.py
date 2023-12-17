@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -47,8 +46,10 @@ length_member = st.slider('Length of Membership', 0, 10, 1)
 
 row = [avg_session_length, time_app, time_web, length_member]
 feat_cols = ['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']
-sc, model = load('CustomerBehaviorPrediction/app/scalers/data_scaler.joblib',
-                 'CustomerBehaviorPrediction/app/scalers/model_scaler.joblib')
+#sc, model = load('CustomerBehaviorPrediction/app/scalers/data_scaler.joblib',
+#                 'CustomerBehaviorPrediction/app/scalers/model_scaler.joblib')
+sc, model = load('scalers/data_scaler.joblib',
+                 'scalers/model_scaler.joblib')
 result = inference(row, sc, model, feat_cols)
 
 if (st.button("Show Result")):

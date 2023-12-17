@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-behavior
+  labels:
+    app: customer-behavior-app
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer-behavior-app
+  template:
+    metadata:
+      labels:
+        app: customer-behavior-app
+    spec:
+      containers:
+      - name: customer-behavior
+        image: pax7898/customer_behavior
+---
+apiVersion: v1
+# Indicates this as a service
+kind: Service
+metadata:
+  # Service name
+  name: customer-behavior
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    # Selector for Pods
+    app: customer-behavior-app
+  ports:
+  # Port Map
+  - port: 8501
+    targetPort: 8501
+    nodePort: 30080
