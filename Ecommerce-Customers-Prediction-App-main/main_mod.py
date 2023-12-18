@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import xgboost as xgb
 from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 st.title('Predicting Customer Spent')
@@ -17,9 +17,9 @@ def load_dataset():
     return df
 
 def train_model(X_train, y_train):
-    xgb_regressor = xgb.XGBRegressor()
-    xgb_regressor.fit(X_train, y_train)
-    return xgb_regressor
+    neural_network_regressor = MLPRegressor(random_state=1, max_iter=500)
+    neural_network_regressor.fit(X_train, y_train)
+    return neural_network_regressor
 
 def testing_model(model, X_test, y_test):
     y_pred = model.predict(X_test)

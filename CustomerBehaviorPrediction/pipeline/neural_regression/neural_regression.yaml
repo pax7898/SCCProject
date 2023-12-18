@@ -1,0 +1,21 @@
+name: Neural Regression
+description: Trains a Neural Regression
+
+inputs:
+- {name: Data, type: LocalPath, description: 'Path where data is stored.'}
+outputs:
+- {name: Mae, type: Float, description: 'Mean Absolute Error metric'}
+
+implementation:
+  container:
+    image: pax7898/neural_regression
+    command: [
+      python, neural_regression.py,
+
+      --data,
+      {inputPath: Data},
+
+      --mae,
+      {outputPath: Mae},
+
+    ]
