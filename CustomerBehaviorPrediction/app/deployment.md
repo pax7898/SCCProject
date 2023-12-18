@@ -9,7 +9,7 @@ Open terminal window and move inside the directory **/CustomerBehaviorPrediction
 <h3> Use </h3>
 
 Visit the following URL:
- * *http://127.0.0.1:30800/*
+ * *http://127.0.0.1:30700/*
 
 <h3> Clean </h3>
 To delete the deployment run:
