@@ -5,6 +5,7 @@ inputs:
 - {name: Data, type: LocalPath, description: 'Path where data is stored.'}
 outputs:
 - {name: Mae, type: Float, description: 'Mean Absolute Error metric'}
+- {name: Params, type: String, description: 'Best parameters'}
 
 implementation:
   container:
@@ -17,5 +18,7 @@ implementation:
 
       --mae,
       {outputPath: Mae},
+      --params,
+      {outputPath: Params},
 
     ]

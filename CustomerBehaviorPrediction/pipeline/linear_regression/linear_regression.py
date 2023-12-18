@@ -6,6 +6,7 @@ from pathlib import Path
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import GridSearchCV
 
 
 def _linear_regression(args):
@@ -25,20 +26,33 @@ def _linear_regression(args):
     x_test = data['x_test']
     y_test = data['y_test']
     
-    # Initialize and train the model
+    # Initialize the model
     model = LinearRegression()
-    model.fit(x_train, y_train)
+    #model.fit(x_train, y_train)
 
+    # Parameter grid for Linear Regression
+    model_param_grid = {
+        'fit_intercept': [True, False],
+        'positive': [True, False],
+        'copy_X': [True, False],
+        'n_jobs': [None, -1],  # -1 utilizza tutti i processori disponibili
+    }
 
-    # Get predictions
-    y_pred = model.predict(x_test)
+    # Perform GridSearch
+    grid = GridSearchCV(model, model_param_grid, cv=3, scoring='neg_mean_absolute_error', n_jobs=-1)
+    grid.fit(x_train, y_train)
 
-    mae = mean_absolute_error(y_test, y_pred)
+    best_model = grid.best_estimator_
+    best_params = str(grid.best_params_)
+    best_mae = grid.best_score_
 
-    # Save output into file
+    # Salva l'output nel file
     with open(args.mae, 'w') as mae_file:
-        mae_file.write(str(mae))
+        mae_file.write(str(best_mae))
 
+    # Salva l'output nel file
+    with open(args.params, 'w') as params_file:
+        params_file.write(str(best_params))
 
 
 if __name__ == '__main__':
@@ -46,10 +60,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
     parser.add_argument('--mae', type=str)
+    parser.add_argument('--params', type=str)
 
     args = parser.parse_args()
 
     # Creating the directory where the output file will be created (the directory may or may not exist).
     Path(args.mae).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.params).parent.mkdir(parents=True, exist_ok=True)
     
     _linear_regression(args)

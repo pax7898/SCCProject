@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: customer-pipeline-
-  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-16T18:39:19.130326',
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-18T18:44:04.246273',
     pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
       for Customer Spends predicition.", "name": "Customer Pipeline"}'}
   labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
@@ -12,48 +12,69 @@ spec:
   - name: customer-pipeline
     dag:
       tasks:
-      - name: linear-regression-classifier
-        template: linear-regression-classifier
+      - name: linear-regression
+        template: linear-regression
         dependencies: [load-data-function]
         arguments:
           artifacts:
           - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
       - {name: load-data-function, template: load-data-function}
+      - name: neural-regression
+        template: neural-regression
+        dependencies: [load-data-function]
+        arguments:
+          artifacts:
+          - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
       - name: show-results
         template: show-results
-        dependencies: [linear-regression-classifier]
+        dependencies: [linear-regression, neural-regression, xgboost-regressor]
         arguments:
           parameters:
-          - {name: linear-regression-classifier-Mae, value: '{{tasks.linear-regression-classifier.outputs.parameters.linear-regression-classifier-Mae}}'}
-  - name: linear-regression-classifier
+          - {name: linear-regression-Mae, value: '{{tasks.linear-regression.outputs.parameters.linear-regression-Mae}}'}
+          - {name: linear-regression-Params, value: '{{tasks.linear-regression.outputs.parameters.linear-regression-Params}}'}
+          - {name: neural-regression-Mae, value: '{{tasks.neural-regression.outputs.parameters.neural-regression-Mae}}'}
+          - {name: neural-regression-Params, value: '{{tasks.neural-regression.outputs.parameters.neural-regression-Params}}'}
+          - {name: xgboost-regressor-Mae, value: '{{tasks.xgboost-regressor.outputs.parameters.xgboost-regressor-Mae}}'}
+          - {name: xgboost-regressor-Params, value: '{{tasks.xgboost-regressor.outputs.parameters.xgboost-regressor-Params}}'}
+      - name: xgboost-regressor
+        template: xgboost-regressor
+        dependencies: [load-data-function]
+        arguments:
+          artifacts:
+          - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
+  - name: linear-regression
     container:
       args: []
       command: [python, linear_regression.py, --data, /tmp/inputs/Data/data, --mae,
-        /tmp/outputs/Mae/data]
+        /tmp/outputs/Mae/data, --params, /tmp/outputs/Params/data]
       image: pax7898/linear_regression
     inputs:
       artifacts:
       - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
     outputs:
       parameters:
-      - name: linear-regression-classifier-Mae
+      - name: linear-regression-Mae
         valueFrom: {path: /tmp/outputs/Mae/data}
+      - name: linear-regression-Params
+        valueFrom: {path: /tmp/outputs/Params/data}
       artifacts:
-      - {name: linear-regression-classifier-Mae, path: /tmp/outputs/Mae/data}
+      - {name: linear-regression-Mae, path: /tmp/outputs/Mae/data}
+      - {name: linear-regression-Params, path: /tmp/outputs/Params/data}
     metadata:
       labels:
         pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
         pipelines.kubeflow.org/pipeline-sdk-type: kfp
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
-          a Linear Regression Classifier", "implementation": {"container": {"command":
-          ["python", "linear_regression.py", "--data", {"inputPath": "Data"}, "--mae",
-          {"outputPath": "Mae"}], "image": "pax7898/linear_regression"}}, "inputs":
-          [{"description": "Path where data is stored.", "name": "Data", "type": "LocalPath"}],
-          "name": "Linear Regression Classifier", "outputs": [{"description": "Mean
-          Absolute Error metric", "name": "Mae", "type": "Float"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
-          "cffd55da83f32363be76994b1a91cdb0c7263056b75a9cb87ea70556fc46555b", "url":
-          "CustomerBehaviorPrediction/pipeline/linear_regression/linear_regression.yaml"}'}
+          a Linear Regression", "implementation": {"container": {"command": ["python",
+          "linear_regression.py", "--data", {"inputPath": "Data"}, "--mae", {"outputPath":
+          "Mae"}, "--params", {"outputPath": "Params"}], "image": "pax7898/linear_regression"}},
+          "inputs": [{"description": "Path where data is stored.", "name": "Data",
+          "type": "LocalPath"}], "name": "Linear Regression", "outputs": [{"description":
+          "Mean Absolute Error metric", "name": "Mae", "type": "Float"}, {"description":
+          "Best parameters", "name": "Params", "type": "String"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "7d1631b78ec0e72b9e88dd069665a3e32c7671f05a3d213c2e52ab07d1381402", "url":
+          "linear_regression/linear_regression.yaml"}'}
   - name: load-data-function
     container:
       args: []
@@ -73,10 +94,46 @@ spec:
           "name": "Load Data Function", "outputs": [{"description": "Path where data
           will be stored.", "name": "Data", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
           "bad9c0b5b37a27ca151d5f04636cd8098299baa3e9036a5924c96bbbea97b359", "url":
-          "CustomerBehaviorPrediction/pipeline/load_data/load_data.yaml"}'}
+          "load_data/load_data.yaml"}'}
+  - name: neural-regression
+    container:
+      args: []
+      command: [python, neural_regression.py, --data, /tmp/inputs/Data/data, --mae,
+        /tmp/outputs/Mae/data, --params, /tmp/outputs/Params/data]
+      image: pax7898/neural_regression
+    inputs:
+      artifacts:
+      - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
+    outputs:
+      parameters:
+      - name: neural-regression-Mae
+        valueFrom: {path: /tmp/outputs/Mae/data}
+      - name: neural-regression-Params
+        valueFrom: {path: /tmp/outputs/Params/data}
+      artifacts:
+      - {name: neural-regression-Mae, path: /tmp/outputs/Mae/data}
+      - {name: neural-regression-Params, path: /tmp/outputs/Params/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
+          a Neural Regression", "implementation": {"container": {"command": ["python",
+          "neural_regression.py", "--data", {"inputPath": "Data"}, "--mae", {"outputPath":
+          "Mae"}, "--params", {"outputPath": "Params"}], "image": "pax7898/neural_regression"}},
+          "inputs": [{"description": "Path where data is stored.", "name": "Data",
+          "type": "LocalPath"}], "name": "Neural Regression", "outputs": [{"description":
+          "Mean Absolute Error metric", "name": "Mae", "type": "Float"}, {"description":
+          "Best parameters", "name": "Params", "type": "String"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "213966126836035a13f246c9f838ac5ec4518683ac4903a802a5967c88f5056d", "url":
+          "neural_regression/neural_regression.yaml"}'}
   - name: show-results
     container:
-      args: [--linear-regression, '{{inputs.parameters.linear-regression-classifier-Mae}}']
+      args: [--lr-mae, '{{inputs.parameters.linear-regression-Mae}}', --lr-params,
+        '{{inputs.parameters.linear-regression-Params}}', --xgb-mae, '{{inputs.parameters.xgboost-regressor-Mae}}',
+        --xgb-params, '{{inputs.parameters.xgboost-regressor-Params}}', --neural-mae,
+        '{{inputs.parameters.neural-regression-Mae}}', --neural-params, '{{inputs.parameters.neural-regression-Params}}']
       command:
       - sh
       - -ec
@@ -85,39 +142,113 @@ spec:
         printf "%s" "$0" > "$program_path"
         python3 -u "$program_path" "$@"
       - |
-        def show_results(linear_regression):
+        def show_results(lr_mae,
+                         lr_params,
+                         xgb_mae,
+                         xgb_params,
+                         neural_mae,
+                         neural_params):
             # Given the outputs from linear regression components
             # the results are shown.
 
-            print(f"Linear regression (accuracy): {linear_regression}")
+            print(f"Linear Regression (mean absolute error): {lr_mae}")
+            print(f"Linear Regression Best Parameters: {lr_params}\n")
+
+            print(f"XGBoost Regressor (mean absolute error): {xgb_mae}")
+            print(f"XGBoost Regressor Best Parameters: {xgb_params}\n")
+
+            print(f"Neural Network Regression (mean absolute error): {neural_mae}")
+            print(f"Neural Network Regression Best Parameters: {neural_params}\n")
 
         import argparse
         _parser = argparse.ArgumentParser(prog='Show results', description='')
-        _parser.add_argument("--linear-regression", dest="linear_regression", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--lr-mae", dest="lr_mae", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--lr-params", dest="lr_params", type=str, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--xgb-mae", dest="xgb_mae", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--xgb-params", dest="xgb_params", type=str, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--neural-mae", dest="neural_mae", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--neural-params", dest="neural_params", type=str, required=True, default=argparse.SUPPRESS)
         _parsed_args = vars(_parser.parse_args())
 
         _outputs = show_results(**_parsed_args)
       image: python:3.7
     inputs:
       parameters:
-      - {name: linear-regression-classifier-Mae}
+      - {name: linear-regression-Mae}
+      - {name: linear-regression-Params}
+      - {name: neural-regression-Mae}
+      - {name: neural-regression-Params}
+      - {name: xgboost-regressor-Mae}
+      - {name: xgboost-regressor-Params}
     metadata:
       labels:
         pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
         pipelines.kubeflow.org/pipeline-sdk-type: kfp
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"implementation": {"container":
-          {"args": ["--linear-regression", {"inputValue": "linear_regression"}], "command":
-          ["sh", "-ec", "program_path=$(mktemp)\nprintf \"%s\" \"$0\" > \"$program_path\"\npython3
-          -u \"$program_path\" \"$@\"\n", "def show_results(linear_regression):\n    #
+          {"args": ["--lr-mae", {"inputValue": "lr_mae"}, "--lr-params", {"inputValue":
+          "lr_params"}, "--xgb-mae", {"inputValue": "xgb_mae"}, "--xgb-params", {"inputValue":
+          "xgb_params"}, "--neural-mae", {"inputValue": "neural_mae"}, "--neural-params",
+          {"inputValue": "neural_params"}], "command": ["sh", "-ec", "program_path=$(mktemp)\nprintf
+          \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+          "def show_results(lr_mae,\n                 lr_params,\n                 xgb_mae,\n                 xgb_params,\n                 neural_mae,\n                 neural_params):\n    #
           Given the outputs from linear regression components\n    # the results are
-          shown.\n\n    print(f\"Linear regression (accuracy): {linear_regression}\")\n\nimport
-          argparse\n_parser = argparse.ArgumentParser(prog=''Show results'', description='''')\n_parser.add_argument(\"--linear-regression\",
-          dest=\"linear_regression\", type=float, required=True, default=argparse.SUPPRESS)\n_parsed_args
+          shown.\n\n    print(f\"Linear Regression (mean absolute error): {lr_mae}\")\n    print(f\"Linear
+          Regression Best Parameters: {lr_params}\\n\")\n\n    print(f\"XGBoost Regressor
+          (mean absolute error): {xgb_mae}\")\n    print(f\"XGBoost Regressor Best
+          Parameters: {xgb_params}\\n\")\n\n    print(f\"Neural Network Regression
+          (mean absolute error): {neural_mae}\")\n    print(f\"Neural Network Regression
+          Best Parameters: {neural_params}\\n\")\n\nimport argparse\n_parser = argparse.ArgumentParser(prog=''Show
+          results'', description='''')\n_parser.add_argument(\"--lr-mae\", dest=\"lr_mae\",
+          type=float, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--lr-params\",
+          dest=\"lr_params\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--xgb-mae\",
+          dest=\"xgb_mae\", type=float, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--xgb-params\",
+          dest=\"xgb_params\", type=str, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--neural-mae\",
+          dest=\"neural_mae\", type=float, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--neural-params\",
+          dest=\"neural_params\", type=str, required=True, default=argparse.SUPPRESS)\n_parsed_args
           = vars(_parser.parse_args())\n\n_outputs = show_results(**_parsed_args)\n"],
-          "image": "python:3.7"}}, "inputs": [{"name": "linear_regression", "type":
-          "Float"}], "name": "Show results"}', pipelines.kubeflow.org/component_ref: '{}',
-        pipelines.kubeflow.org/arguments.parameters: '{"linear_regression": "{{inputs.parameters.linear-regression-classifier-Mae}}"}'}
+          "image": "python:3.7"}}, "inputs": [{"name": "lr_mae", "type": "Float"},
+          {"name": "lr_params", "type": "String"}, {"name": "xgb_mae", "type": "Float"},
+          {"name": "xgb_params", "type": "String"}, {"name": "neural_mae", "type":
+          "Float"}, {"name": "neural_params", "type": "String"}], "name": "Show results"}',
+        pipelines.kubeflow.org/component_ref: '{}', pipelines.kubeflow.org/arguments.parameters: '{"lr_mae":
+          "{{inputs.parameters.linear-regression-Mae}}", "lr_params": "{{inputs.parameters.linear-regression-Params}}",
+          "neural_mae": "{{inputs.parameters.neural-regression-Mae}}", "neural_params":
+          "{{inputs.parameters.neural-regression-Params}}", "xgb_mae": "{{inputs.parameters.xgboost-regressor-Mae}}",
+          "xgb_params": "{{inputs.parameters.xgboost-regressor-Params}}"}'}
+  - name: xgboost-regressor
+    container:
+      args: []
+      command: [python, xgboost_regressor.py, --data, /tmp/inputs/Data/data, --mae,
+        /tmp/outputs/Mae/data, --params, /tmp/outputs/Params/data]
+      image: pax7898/xgboost_regressor
+    inputs:
+      artifacts:
+      - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
+    outputs:
+      parameters:
+      - name: xgboost-regressor-Mae
+        valueFrom: {path: /tmp/outputs/Mae/data}
+      - name: xgboost-regressor-Params
+        valueFrom: {path: /tmp/outputs/Params/data}
+      artifacts:
+      - {name: xgboost-regressor-Mae, path: /tmp/outputs/Mae/data}
+      - {name: xgboost-regressor-Params, path: /tmp/outputs/Params/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
+          a XGBoost Regressor", "implementation": {"container": {"command": ["python",
+          "xgboost_regressor.py", "--data", {"inputPath": "Data"}, "--mae", {"outputPath":
+          "Mae"}, "--params", {"outputPath": "Params"}], "image": "pax7898/xgboost_regressor"}},
+          "inputs": [{"description": "Path where data is stored.", "name": "Data",
+          "type": "LocalPath"}], "name": "XGBoost Regressor", "outputs": [{"description":
+          "Mean Absolute Error metric", "name": "Mae", "type": "Float"}, {"description":
+          "Best parameters", "name": "Params", "type": "String"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "c9faf184371e3ddd32d02a8953f2a28b571940e4fa56c3f1d7309ed16800e8a3", "url":
+          "xgboost_regressor/xgboost_regressor.yaml"}'}
   arguments:
     parameters: []
   serviceAccountName: pipeline-runner

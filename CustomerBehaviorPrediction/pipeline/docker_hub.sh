@@ -10,6 +10,6 @@ docker build --tag xgboost_regressor xgboost_regressor/.
 docker tag xgboost_regressor pax7898/xgboost_regressor
 docker push docker.io/pax7898/xgboost_regressor
 
-# docker build --tag neural_regression neural_regression/.
-# docker tag neural_regression pax7898/neural_regression
-# docker push docker.io/pax7898/neural_regression
+docker build --tag neural_regression neural_regression/.
+docker tag neural_regression pax7898/neural_regression
+docker push docker.io/pax7898/neural_regression
