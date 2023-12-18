@@ -15,7 +15,7 @@ st.markdown("""
         """)
 
 def load_dataset():
-    df = pd.read_csv('Ecommerce-Customers-Prediction-App-main/Ecommerce Customers.csv')
+    df = pd.read_csv('Ecommerce Customers.csv')
     return df
 
 def train_model(X_train, y_train):

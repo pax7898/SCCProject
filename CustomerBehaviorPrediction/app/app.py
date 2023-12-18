@@ -1,17 +1,7 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.preprocessing import StandardScaler
 import joblib
 
-
-# SICURAMENTE QUALCHE LIBRERIA ANDRÀ TOLTA
-
-# @st.cache(allow_output_mutation=True) -> deprecated
 @st.cache_data()
 def load(scaler_path, model_path):
     sc = joblib.load(scaler_path)
@@ -20,15 +10,16 @@ def load(scaler_path, model_path):
 
 
 def inference(row, scaler, model, feat_cols):
-    # df = pd.DataFrame([row], columns = feat_cols)
+    df = pd.DataFrame([row], columns = feat_cols)
     # X = scaler.transform(df)
     # features = pd.DataFrame(X, columns = feat_cols)
-    predictions = model.predict([row])
-    return predictions
+    # prediction = model.predict(features)
+    prediction = model.predict(df)
+    return prediction
 
-
-# DA MIGLIORARE, NON HO BEN CAPITO NELL'app.py DEL PROF PERCHÉ IN inference FA TUTTO QUEL CASINO
-# QUI NON CE N'È BISOGNO PERCIÒ È COMMENTATO
+# NOTA: facendo lo scaling dei dati in input (come lo fa il prof) i valori
+# predetti risultano sballati... deduco che non c'è bisogno di fare scaling  
+# poiché la scala dei dati input è la stessa dei dati su cui è stato allenato il modello
 
 
 st.title('Predicting Customer Spent')
@@ -50,7 +41,7 @@ feat_cols = ['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of
 #                 'CustomerBehaviorPrediction/app/scalers/model_scaler.joblib')
 sc, model = load('scalers/data_scaler.joblib',
                  'scalers/model_scaler.joblib')
-result = inference(row, sc, model, feat_cols)
+result = inference(row, sc, model, feat_cols)[0]
 
 if (st.button("Show Result")):
     st.header("This predicted Amount Spent: ${}".format(int(result)))
