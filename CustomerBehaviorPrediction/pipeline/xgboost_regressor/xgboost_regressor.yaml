@@ -1,5 +1,5 @@
-name: Linear Regression
-description: Trains a Linear Regression
+name: XGBoost Regressor
+description: Trains a XGBoost Regressor
 
 inputs:
 - {name: Data, type: LocalPath, description: 'Path where data is stored.'}
@@ -8,9 +8,9 @@ outputs:
 
 implementation:
   container:
-    image: pax7898/linear_regression
+    image: pax7898/xgboost_regressor
     command: [
-      python, linear_regression.py,
+      python, xgboost_regressor.py,
 
       --data,
       {inputPath: Data},
