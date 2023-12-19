@@ -2,7 +2,7 @@ name: Load Data Function
 description: Load data from local dataset
 
 outputs:
-- {name: Data, type: LocalPath, description: 'Path where data will be stored.'}
+- {name: RawData, type: LocalPath, description: 'Path where data will be stored.'}
 
 implementation:
   container:
@@ -10,6 +10,6 @@ implementation:
     command: [
       python, load_data.py,
 
-      --data,
-      {outputPath: Data},
+      --raw_data,
+      {outputPath: RawData},
     ]

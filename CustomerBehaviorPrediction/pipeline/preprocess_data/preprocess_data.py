@@ -7,29 +7,23 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import PolynomialFeatures
 
-# DA INTEGRARE CON load_data e customers_pipeline 
-# PER ORA EFFETTUA ANCHE QUI IL LOAD DAL CSV
+# DA INTEGRARE CON customers_pipeline 
 
 def _preprocess_data(args):
-    # Gets and split dataset
-    df = pd.read_csv('ecommerce_customers.csv')
-    df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
+    # Apri e leggi il file JSON creato da load_data.py
+    with open(args.raw_data) as data_file:
+        data_loaded = json.load(data_file)
+
+    # Crea un DataFrame per le features e un Series per il target
+    df = pd.DataFrame(data_loaded, columns=['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership','Yearly Amount Spent'])
 
     # Gestione dei valori mancanti con la mediana
     imputer = SimpleImputer(strategy='median')
     df = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
 
-    # Creazione di nuove features polinomiali
-    poly_features = ['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']
-    poly_transformer = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
-    poly_data = poly_transformer.fit_transform(df[poly_features])
-    poly_columns = poly_transformer.get_feature_names(poly_features)
-    df_poly = pd.DataFrame(poly_data, columns=poly_columns)
-    df = pd.concat([df, df_poly], axis=1)
-
     # Standardizzazione delle features numeriche
     scaler = StandardScaler()
-    numeric_features = df.columns
+    numeric_features = df.columns[:-1]  # Escludi l'ultima colonna (la variabile target)
     df[numeric_features] = scaler.fit_transform(df[numeric_features])
 
     # Aumento del dataset (aumento di 200 entries)
@@ -54,6 +48,7 @@ def _preprocess_data(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--raw_data', type=str)
     parser.add_argument('--data', type=str)
 
     args = parser.parse_args()

@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: customer-pipeline-
-  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-18T18:44:04.246273',
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-19T13:35:46.180179',
     pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
       for Customer Spends predicition.", "name": "Customer Pipeline"}'}
   labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
@@ -14,17 +14,23 @@ spec:
       tasks:
       - name: linear-regression
         template: linear-regression
-        dependencies: [load-data-function]
+        dependencies: [preprocess-data-function]
         arguments:
           artifacts:
-          - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
+          - {name: preprocess-data-function-Data, from: '{{tasks.preprocess-data-function.outputs.artifacts.preprocess-data-function-Data}}'}
       - {name: load-data-function, template: load-data-function}
       - name: neural-regression
         template: neural-regression
+        dependencies: [preprocess-data-function]
+        arguments:
+          artifacts:
+          - {name: preprocess-data-function-Data, from: '{{tasks.preprocess-data-function.outputs.artifacts.preprocess-data-function-Data}}'}
+      - name: preprocess-data-function
+        template: preprocess-data-function
         dependencies: [load-data-function]
         arguments:
           artifacts:
-          - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
+          - {name: load-data-function-RawData, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-RawData}}'}
       - name: show-results
         template: show-results
         dependencies: [linear-regression, neural-regression, xgboost-regressor]
@@ -38,10 +44,10 @@ spec:
           - {name: xgboost-regressor-Params, value: '{{tasks.xgboost-regressor.outputs.parameters.xgboost-regressor-Params}}'}
       - name: xgboost-regressor
         template: xgboost-regressor
-        dependencies: [load-data-function]
+        dependencies: [preprocess-data-function]
         arguments:
           artifacts:
-          - {name: load-data-function-Data, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-Data}}'}
+          - {name: preprocess-data-function-Data, from: '{{tasks.preprocess-data-function.outputs.artifacts.preprocess-data-function-Data}}'}
   - name: linear-regression
     container:
       args: []
@@ -50,7 +56,7 @@ spec:
       image: pax7898/linear_regression
     inputs:
       artifacts:
-      - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
+      - {name: preprocess-data-function-Data, path: /tmp/inputs/Data/data}
     outputs:
       parameters:
       - name: linear-regression-Mae
@@ -78,11 +84,11 @@ spec:
   - name: load-data-function
     container:
       args: []
-      command: [python, load_data.py, --data, /tmp/outputs/Data/data]
+      command: [python, load_data.py, --raw_data, /tmp/outputs/RawData/data]
       image: pax7898/load_data
     outputs:
       artifacts:
-      - {name: load-data-function-Data, path: /tmp/outputs/Data/data}
+      - {name: load-data-function-RawData, path: /tmp/outputs/RawData/data}
     metadata:
       labels:
         pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
@@ -90,10 +96,10 @@ spec:
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Load
           data from local dataset", "implementation": {"container": {"command": ["python",
-          "load_data.py", "--data", {"outputPath": "Data"}], "image": "pax7898/load_data"}},
+          "load_data.py", "--raw_data", {"outputPath": "RawData"}], "image": "pax7898/load_data"}},
           "name": "Load Data Function", "outputs": [{"description": "Path where data
-          will be stored.", "name": "Data", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
-          "bad9c0b5b37a27ca151d5f04636cd8098299baa3e9036a5924c96bbbea97b359", "url":
+          will be stored.", "name": "RawData", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "acee23d1da788f3ae9978d50db928f2f0a2c5450e8bccc91df530113fa39cf5b", "url":
           "load_data/load_data.yaml"}'}
   - name: neural-regression
     container:
@@ -103,7 +109,7 @@ spec:
       image: pax7898/neural_regression
     inputs:
       artifacts:
-      - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
+      - {name: preprocess-data-function-Data, path: /tmp/inputs/Data/data}
     outputs:
       parameters:
       - name: neural-regression-Mae
@@ -128,6 +134,32 @@ spec:
           "Best parameters", "name": "Params", "type": "String"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
           "213966126836035a13f246c9f838ac5ec4518683ac4903a802a5967c88f5056d", "url":
           "neural_regression/neural_regression.yaml"}'}
+  - name: preprocess-data-function
+    container:
+      args: []
+      command: [python, preprocess_data.py, --raw_data, /tmp/inputs/RawData/data,
+        --data, /tmp/outputs/Data/data]
+      image: pax7898/preprocess_data
+    inputs:
+      artifacts:
+      - {name: load-data-function-RawData, path: /tmp/inputs/RawData/data}
+    outputs:
+      artifacts:
+      - {name: preprocess-data-function-Data, path: /tmp/outputs/Data/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Preprocess
+          data from local dataset", "implementation": {"container": {"command": ["python",
+          "preprocess_data.py", "--raw_data", {"inputPath": "RawData"}, "--data",
+          {"outputPath": "Data"}], "image": "pax7898/preprocess_data"}}, "inputs":
+          [{"description": "Path where data is stored.", "name": "RawData", "type":
+          "LocalPath"}], "name": "Preprocess Data Function", "outputs": [{"description":
+          "Path where preprocessed data will be stored.", "name": "Data", "type":
+          "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest": "b60992e6a4f5883e7dc74d3ae98c4232340881dc06d885f3a4aa1f9d3b1543b9",
+          "url": "preprocess_data/preprocess_data.yaml"}'}
   - name: show-results
     container:
       args: [--lr-mae, '{{inputs.parameters.linear-regression-Mae}}', --lr-params,
@@ -224,7 +256,7 @@ spec:
       image: pax7898/xgboost_regressor
     inputs:
       artifacts:
-      - {name: load-data-function-Data, path: /tmp/inputs/Data/data}
+      - {name: preprocess-data-function-Data, path: /tmp/inputs/Data/data}
     outputs:
       parameters:
       - name: xgboost-regressor-Mae

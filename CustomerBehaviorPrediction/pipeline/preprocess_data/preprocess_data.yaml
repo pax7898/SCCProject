@@ -1,6 +1,8 @@
 name: Preprocess Data Function
 description: Preprocess data from local dataset
 
+inputs:
+- {name: RawData, type: LocalPath, description: 'Path where data is stored.'}
 outputs:
 - {name: Data, type: LocalPath, description: 'Path where preprocessed data will be stored.'}
 
@@ -9,6 +11,9 @@ implementation:
     image: pax7898/preprocess_data
     command: [
       python, preprocess_data.py,
+
+      --raw_data,
+      {inputPath: RawData},
 
       --data,
       {outputPath: Data},
