@@ -47,7 +47,7 @@ def _neural_regression(args):
 
     # Salva l'output nel file
     with open(args.params, 'w') as params_file:
-        params_file.write(str(best_params))
+        params_file.write(str(best_params))\
 
 
 if __name__ == '__main__':
