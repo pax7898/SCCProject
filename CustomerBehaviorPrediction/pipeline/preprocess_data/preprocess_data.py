@@ -14,8 +14,9 @@ def _preprocess_data(args):
     with open(args.raw_data) as data_file:
         data_loaded = json.load(data_file)
 
+    data = json.loads(data_loaded)
     # Crea un DataFrame per le features e un Series per il target
-    df = pd.DataFrame(data_loaded, columns=['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership','Yearly Amount Spent'])
+    df = pd.DataFrame(data, columns=['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership','Yearly Amount Spent'])
 
     # Gestione dei valori mancanti con la mediana
     imputer = SimpleImputer(strategy='median')
@@ -30,8 +31,9 @@ def _preprocess_data(args):
     df_augmented = df.sample(n=200, replace=True, random_state=42)
     df = pd.concat([df, df_augmented], ignore_index=True)
 
-    x = df.drop('Yearly Amount Spent', axis=1)
     y = df['Yearly Amount Spent']
+    x = df.drop('Yearly Amount Spent', axis=1)
+
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
     x_train, x_test, y_train, y_test = x_train.to_numpy(), x_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
 

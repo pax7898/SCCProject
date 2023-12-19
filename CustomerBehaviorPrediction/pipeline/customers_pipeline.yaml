@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: customer-pipeline-
-  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-19T15:23:52.004209',
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-19T18:06:17.731756',
     pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
       for Customer Spends predicition.", "name": "Customer Pipeline"}'}
   labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
@@ -12,6 +12,14 @@ spec:
   - name: customer-pipeline
     dag:
       tasks:
+      - name: evaluate-best-model
+        template: evaluate-best-model
+        dependencies: [linear-regression, neural-regression, xgboost-regressor]
+        arguments:
+          parameters:
+          - {name: linear-regression-Mae, value: '{{tasks.linear-regression.outputs.parameters.linear-regression-Mae}}'}
+          - {name: neural-regression-Mae, value: '{{tasks.neural-regression.outputs.parameters.neural-regression-Mae}}'}
+          - {name: xgboost-regressor-Mae, value: '{{tasks.xgboost-regressor.outputs.parameters.xgboost-regressor-Mae}}'}
       - name: linear-regression
         template: linear-regression
         dependencies: [preprocess-data-function]
@@ -48,6 +56,65 @@ spec:
         arguments:
           artifacts:
           - {name: preprocess-data-function-Data, from: '{{tasks.preprocess-data-function.outputs.artifacts.preprocess-data-function-Data}}'}
+  - name: evaluate-best-model
+    container:
+      args: [--lr, '{{inputs.parameters.linear-regression-Mae}}', --xgb, '{{inputs.parameters.xgboost-regressor-Mae}}',
+        --neural, '{{inputs.parameters.neural-regression-Mae}}']
+      command:
+      - sh
+      - -ec
+      - |
+        program_path=$(mktemp)
+        printf "%s" "$0" > "$program_path"
+        python3 -u "$program_path" "$@"
+      - |
+        def evaluate_best_model(lr,
+                                xgb,
+                                neural):
+
+            models = [('Linear Regressor', lr), ('XGBoost Regressor',xgb), ('Neural Regression',neural)]
+
+            best_model = max(models, key=lambda x: x[1])
+
+            print("Best model: " + str(best_model[0]) + "\nAccuracy: " + str(best_model[1]))
+
+        import argparse
+        _parser = argparse.ArgumentParser(prog='Evaluate best model', description='')
+        _parser.add_argument("--lr", dest="lr", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--xgb", dest="xgb", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--neural", dest="neural", type=float, required=True, default=argparse.SUPPRESS)
+        _parsed_args = vars(_parser.parse_args())
+
+        _outputs = evaluate_best_model(**_parsed_args)
+      image: python:3.7
+    inputs:
+      parameters:
+      - {name: linear-regression-Mae}
+      - {name: neural-regression-Mae}
+      - {name: xgboost-regressor-Mae}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"implementation": {"container":
+          {"args": ["--lr", {"inputValue": "lr"}, "--xgb", {"inputValue": "xgb"},
+          "--neural", {"inputValue": "neural"}], "command": ["sh", "-ec", "program_path=$(mktemp)\nprintf
+          \"%s\" \"$0\" > \"$program_path\"\npython3 -u \"$program_path\" \"$@\"\n",
+          "def evaluate_best_model(lr,\n                        xgb,\n                        neural):\n\n    models
+          = [(''Linear Regressor'', lr), (''XGBoost Regressor'',xgb), (''Neural Regression'',neural)]\n\n    best_model
+          = max(models, key=lambda x: x[1])\n\n    print(\"Best model: \" + str(best_model[0])
+          + \"\\nAccuracy: \" + str(best_model[1]))\n\nimport argparse\n_parser =
+          argparse.ArgumentParser(prog=''Evaluate best model'', description='''')\n_parser.add_argument(\"--lr\",
+          dest=\"lr\", type=float, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--xgb\",
+          dest=\"xgb\", type=float, required=True, default=argparse.SUPPRESS)\n_parser.add_argument(\"--neural\",
+          dest=\"neural\", type=float, required=True, default=argparse.SUPPRESS)\n_parsed_args
+          = vars(_parser.parse_args())\n\n_outputs = evaluate_best_model(**_parsed_args)\n"],
+          "image": "python:3.7"}}, "inputs": [{"name": "lr", "type": "Float"}, {"name":
+          "xgb", "type": "Float"}, {"name": "neural", "type": "Float"}], "name": "Evaluate
+          best model"}', pipelines.kubeflow.org/component_ref: '{}', pipelines.kubeflow.org/arguments.parameters: '{"lr":
+          "{{inputs.parameters.linear-regression-Mae}}", "neural": "{{inputs.parameters.neural-regression-Mae}}",
+          "xgb": "{{inputs.parameters.xgboost-regressor-Mae}}"}'}
   - name: linear-regression
     container:
       args: []

@@ -15,7 +15,7 @@ def _linear_regression(args):
     with open(args.data) as data_file:
         data = json.load(data_file)
 
-    # The excted data type is 'dict', however since the file
+    # The expected data type is 'dict', however since the file
     # was loaded as a json object, it is first loaded as a string
     # thus we need to load again from such string in order to get 
     # the dict-type object.

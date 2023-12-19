@@ -23,7 +23,7 @@ def _neural_regression(args):
     y_test = data['y_test']
 
     # Inizializza il modello di regressione neurale (MLPRegressor)
-    model = MLPRegressor()
+    model = MLPRegressor(max_iter=500)
 
     # Parametri per la grid search
     model_param_grid = {
@@ -47,7 +47,7 @@ def _neural_regression(args):
 
     # Salva l'output nel file
     with open(args.params, 'w') as params_file:
-        params_file.write(str(best_params))\
+        params_file.write(str(best_params))
 
 
 if __name__ == '__main__':
