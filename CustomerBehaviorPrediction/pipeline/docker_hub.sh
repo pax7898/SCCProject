@@ -1,3 +1,5 @@
+#!/bin/bash
+
 docker build --tag load_data load_data/.
 docker tag load_data pax7898/load_data
 docker push docker.io/pax7898/load_data
