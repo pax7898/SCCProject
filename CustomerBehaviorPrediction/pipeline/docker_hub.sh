@@ -4,6 +4,10 @@ docker build --tag load_data load_data/.
 docker tag load_data pax7898/load_data
 docker push docker.io/pax7898/load_data
 
+docker build --tag preprocess_data preprocess_data/.
+docker tag preprocess_data pax7898/preprocess_data
+docker push docker.io/pax7898/preprocess_data
+
 docker build --tag linear_regression linear_regression/.
 docker tag linear_regression pax7898/linear_regression
 docker push docker.io/pax7898/linear_regression
