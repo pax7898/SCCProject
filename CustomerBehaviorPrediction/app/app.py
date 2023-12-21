@@ -17,7 +17,7 @@ def inference(row, scaler, model, feat_cols):
 
     return prediction
 
-st.title('Predicting Customer Spent')
+st.title('Forecast of a customer\'s annual expenses')
 st.markdown("""
             This is an application to find out how much customers spend on e-commerce in one year!
         
