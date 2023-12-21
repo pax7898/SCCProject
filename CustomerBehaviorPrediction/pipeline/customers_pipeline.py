@@ -4,22 +4,21 @@ from kfp.components import func_to_container_op
 
 
 @func_to_container_op
-def show_results(lr_mae: float,
-                 lr_params: str,
-                 xgb_mae: float,
-                 xgb_params: str,
-                 neural_mae: float,
-                 neural_params: str) -> None:
-    # Given the outputs from linear regression components
-    # the results are shown.
+def show_results(lr_mae_train: float, lr_mae_test: float, lr_params: str,
+                 xgb_mae_train: float, xgb_mae_test: float, xgb_params: str,
+                 neural_mae_train: float, neural_mae_test: float, neural_params: str) -> None:
+    # Given the outputs from the three models components the results are shown.
 
-    print(f"Linear Regression (mean absolute error): {lr_mae}")
+    print(f"Linear Regression (mean absolute error) on Training Set: {lr_mae_train}")
+    print(f"Linear Regression (mean absolute error) on Test Set: {lr_mae_test}")
     print(f"Linear Regression Best Parameters: {lr_params}\n")
 
-    print(f"XGBoost Regressor (mean absolute error): {xgb_mae}")
+    print(f"XGBoost Regressor (mean absolute error)  on Training Set: {xgb_mae_train}")
+    print(f"Linear Regression (mean absolute error) on Test Set: {xgb_mae_test}")
     print(f"XGBoost Regressor Best Parameters: {xgb_params}\n")
 
-    print(f"Neural Network Regression (mean absolute error): {neural_mae}")
+    print(f"Neural Network Regression (mean absolute error)  on Training Set: {neural_mae_train}")
+    print(f"Linear Regression (mean absolute error) on Test Set: {neural_mae_test}")
     print(f"Neural Network Regression Best Parameters: {neural_params}\n")
 
 @func_to_container_op
@@ -27,11 +26,11 @@ def evaluate_best_model(lr:  float,
                         xgb: float,
                         neural: float) -> None:
 
-    models = [('Linear Regressor', lr), ('XGBoost Regressor',xgb), ('Neural Regression',neural)]
+    models = [('Linear Regressor', lr), ('XGBoost Regressor', xgb), ('Neural Regression', neural)]
 
-    best_model = max(models, key=lambda x: x[1])
+    best_model = min(models, key=lambda x: x[1])
 
-    print("Best model: " + str(best_model[0]) + "\nAccuracy: " + str(best_model[1]))
+    print("Best model: " + str(best_model[0]) + "\nMae on Test Set: " + str(best_model[1]))
 
 
 @dsl.pipeline(name='Customer Pipeline', description='Applies Linear Regression for Customer Spends predicition.')
@@ -57,16 +56,13 @@ def customers_pipeline():
 
     # Given the outputs from "linear_regression"
     # the component "show_results" is called to print the results.
-    show_results(linear_regression_task.outputs['Mae'],
-                linear_regression_task.outputs['Params'],
-                xgboost_regressor_task.outputs['Mae'],
-                xgboost_regressor_task.outputs['Params'],
-                neural_regression_task.outputs['Mae'],
-                neural_regression_task.outputs['Params'])
+    show_results(linear_regression_task.outputs['Mae_Train'], linear_regression_task.outputs['Mae_Test'], linear_regression_task.outputs['Params'],
+                xgboost_regressor_task.outputs['Mae_Train'], xgboost_regressor_task.outputs['Mae_Test'], xgboost_regressor_task.outputs['Params'],
+                neural_regression_task.outputs['Mae_Train'], neural_regression_task.outputs['Mae_Test'], neural_regression_task.outputs['Params'])
 
-    evaluate_best_model(linear_regression_task.outputs['Mae'],
-                        xgboost_regressor_task.outputs['Mae'],
-                        neural_regression_task.outputs['Mae'])
+    evaluate_best_model(linear_regression_task.outputs['Mae_Test'],
+                        xgboost_regressor_task.outputs['Mae_Test'],
+                        neural_regression_task.outputs['Mae_Test'])
 
 
 if __name__ == '__main__':

@@ -1,14 +1,9 @@
 import json
-
 import argparse
 from pathlib import Path
-
-from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
-import joblib
-
+from sklearn.metrics import mean_absolute_error
 
 def _linear_regression(args):
     # Open and reads file "data"
@@ -43,11 +38,20 @@ def _linear_regression(args):
 
     best_model = grid.best_estimator_
     best_params = str(grid.best_params_)
-    best_mae = grid.best_score_
 
-    # Save MAE of the best model in a local file
-    with open(args.mae, 'w') as mae_file:
-        mae_file.write(str(best_mae))
+    y_pred_train = best_model.predict(x_train)
+    y_pred_test = best_model.predict(x_test)
+
+    mae_train = mean_absolute_error(y_train, y_pred_train)
+    mae_test = mean_absolute_error(y_test, y_pred_test)
+
+    # Save MAE on training set of the best model in a local file
+    with open(args.mae_train, 'w') as mae_train_file:
+        mae_train_file.write(str(mae_train))
+
+    # Save MAE on test set of the best model in a local file
+    with open(args.mae_test, 'w') as mae_test_file:
+        mae_test_file.write(str(mae_test))
 
     # Save the parameters of the best model in a local file
     with open(args.params, 'w') as params_file:
@@ -58,13 +62,15 @@ if __name__ == '__main__':
     # Defining and parsing the command-line arguments
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
-    parser.add_argument('--mae', type=str)
+    parser.add_argument('--mae_train', type=str)
+    parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)
 
     args = parser.parse_args()
 
-    # Creating the directory where the output file will be created (the directory may or may not exist).
-    Path(args.mae).parent.mkdir(parents=True, exist_ok=True)
+    # Creazione della directory in cui verrà creato il file di output (la directory potrebbe o potrebbe non esistere).
+    Path(args.mae_train).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.mae_test).parent.mkdir(parents=True, exist_ok=True)
     Path(args.params).parent.mkdir(parents=True, exist_ok=True)
 
     _linear_regression(args)

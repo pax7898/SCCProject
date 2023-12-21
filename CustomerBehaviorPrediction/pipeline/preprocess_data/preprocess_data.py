@@ -5,7 +5,6 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import PolynomialFeatures
 
 # DA INTEGRARE CON customers_pipeline 
 

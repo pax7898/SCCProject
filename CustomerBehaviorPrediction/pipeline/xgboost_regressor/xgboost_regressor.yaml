@@ -1,11 +1,12 @@
 name: XGBoost Regressor
-description: Trains a XGBoost Regressor
+description: Train a XGBoost Regressor model
 
 inputs:
 - {name: Data, type: LocalPath, description: 'Path where data is stored.'}
 outputs:
-- {name: Mae, type: Float, description: 'Mean Absolute Error metric'}
-- {name: Params, type: String, description: 'Best parameters'}
+- {name: Mae_Train, type: Float, description: 'Mean Absolute Error metric on Training Set'}
+- {name: Mae_Test, type: Float, description: 'Mean Absolute Error metric on Test Set'}
+- {name: Params, type: String, description: 'Best hyperparameters'}
 
 implementation:
   container:
@@ -16,8 +17,10 @@ implementation:
       --data,
       {inputPath: Data},
 
-      --mae,
-      {outputPath: Mae},
+      --mae_train,
+      {outputPath: Mae_Train},
+      --mae_test,
+      { outputPath: Mae_Test},
       --params,
       {outputPath: Params},
 

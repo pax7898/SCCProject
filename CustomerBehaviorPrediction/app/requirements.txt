@@ -2,3 +2,4 @@ joblib
 streamlit
 matplotlib
 scikit-learn
+xgboost

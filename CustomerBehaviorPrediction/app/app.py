@@ -11,16 +11,11 @@ def load(scaler_path, model_path):
 
 def inference(row, scaler, model, feat_cols):
     df = pd.DataFrame([row], columns = feat_cols)
-    # X = scaler.transform(df)
-    # features = pd.DataFrame(X, columns = feat_cols)
-    # prediction = model.predict(features)
-    prediction = model.predict(df)
+    X = scaler.transform(df)
+    features = pd.DataFrame(X, columns = feat_cols)
+    prediction = model.predict(features)
+
     return prediction
-
-# NOTA: facendo lo scaling dei dati in input (come lo fa il prof) i valori
-# predetti risultano sballati... deduco che non c'è bisogno di fare scaling  
-# poiché la scala dei dati input è la stessa dei dati su cui è stato allenato il modello
-
 
 st.title('Predicting Customer Spent')
 st.markdown("""
@@ -37,10 +32,8 @@ length_member = st.slider('Length of Membership', 0, 10, 1)
 
 row = [avg_session_length, time_app, time_web, length_member]
 feat_cols = ['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']
-#sc, model = load('CustomerBehaviorPrediction/app/scalers/data_scaler.joblib',
-#                 'CustomerBehaviorPrediction/app/scalers/model_scaler.joblib')
-sc, model = load('scalers/data_scaler.joblib',
-                 'scalers/model_scaler.joblib')
+sc, model = load('models/data_scaler.joblib',
+                 'models/model.joblib')
 result = inference(row, sc, model, feat_cols)[0]
 
 if (st.button("Show Result")):

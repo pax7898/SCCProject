@@ -2,9 +2,9 @@
 
 <h3>Deployment</h3>
 
-Open terminal window and move inside the directory **/CustomerBehaviorPrediction** e run:
+Run:
 ```bash
-kubectl create --filename app/k8s_customer_behavior_deployment.yaml
+kubectl create --filename k8s_customer_behavior_deployment.yaml
 ```
 
 <h3> Use </h3>

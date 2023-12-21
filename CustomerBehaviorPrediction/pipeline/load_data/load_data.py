@@ -1,5 +1,4 @@
 import json
-
 import argparse
 import pandas as pd
 from pathlib import Path
@@ -14,15 +13,6 @@ def _load_data(args):
     # Gets and split dataset
     df = pd.read_csv('ecommerce_customers.csv')
     df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
-
-    # x = df.drop('Yearly Amount Spent', axis=1)
-    # y = df['Yearly Amount Spent']
-    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
-    # x_train, x_test, y_train, y_test = x_train.to_numpy(), x_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
-
-    # # Creates `data` structure to save and 
-    # # share train and test datasets.
-    # data = {'x_train': x_train.tolist(), 'y_train': y_train.tolist(), 'x_test': x_test.tolist(), 'y_test': y_test.tolist()}
 
     # Crea la struttura dati per salvare e condividere i dataset
     data = df.to_numpy().tolist()
