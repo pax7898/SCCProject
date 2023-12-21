@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from joblib import dump
 import xgboost as xgb
 
+
 ###########################################################################################
 ### SCRIPT PER LA CREAZIONE DELLO SCALER E DEL MODELLO UTILIZZATO DALLA WEB APPLICATION ###
 ###########################################################################################
@@ -13,6 +14,7 @@ import xgboost as xgb
 def load_dataset():
     df = pd.read_csv('../pipeline/load_data/ecommerce_customers.csv')
     return df
+
 
 def pre_processing(df, test_size, random_state):
     df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
@@ -31,16 +33,20 @@ def pre_processing(df, test_size, random_state):
 
     return X_train, X_test, y_train, y_test
 
+
 def train_model(xgb, X_train, y_train, params):
-    xgb.set_params(learning_rate=params['learning_rate'], max_depth=params['max_depth'], n_estimators=params['n_estimators'], subsample=params['subsample'])
+    xgb.set_params(learning_rate=params['learning_rate'], max_depth=params['max_depth'],
+                   n_estimators=params['n_estimators'], subsample=params['subsample'])
     xgb.fit(X_train, y_train)
     dump(xgb, 'models/model.joblib')
     print("\n MODEL DUMP GENERATED")
     return xgb
 
+
 def testing_model(model, X_test):
     y_pred = model.predict(X_test)
     return y_pred
+
 
 def evaluate(y_pred, y_test):
     mae = mean_absolute_error(y_test, y_pred)
@@ -49,6 +55,7 @@ def evaluate(y_pred, y_test):
     e = ['MAE', 'RMSE', 'R-Squared']
     eval = pd.DataFrame([mae, rmse, r2], index=e, columns=['Score'])
     return eval
+
 
 if __name__ == '__main__':
     df = load_dataset()
@@ -62,7 +69,3 @@ if __name__ == '__main__':
     eval = evaluate(y_pred, y_test)
 
     print(eval)
-
-
-
-

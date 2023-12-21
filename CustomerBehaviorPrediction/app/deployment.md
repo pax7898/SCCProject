@@ -15,9 +15,6 @@ Visit the following URL: http://127.0.0.1:30070/
 To delete the deployment run:
 
 ```bash
-kubectl delete services customer-behavior
+kubectl delete services customer-behavior && kubectl delete deployment customer-behavior
 ```
 
-```bash
-kubectl delete deployment customer-behavior
-```
