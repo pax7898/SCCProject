@@ -1,5 +1,4 @@
 ## Pipeline
-Upload and execute customers_pipeline.yaml in kubeflow.
 
 ### Install kubeflow on kubernetes cluster
 ```bash
@@ -26,3 +25,5 @@ kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
 
 Link to dashboard:
 http://localhost:8080/
+
+### Upload and execute `customers_pipeline.yaml` in kubeflow.
