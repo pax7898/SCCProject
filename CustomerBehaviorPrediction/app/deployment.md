@@ -1,10 +1,14 @@
 <h2>Customer behavior prediction app on Kubernetes cluster </h2>
 
 <h3>Deployment</h3>
-
-Run:
+Deployment and Service Creation:
 ```bash
 kubectl create --filename k8s_customer_behavior_deployment.yaml
+```
+
+Horizontal Pod Autoscaler Creation:
+```bash
+kubectl autoscale deployment customer-behavior --cpu-percent=50 --min=2 --max=10
 ```
 
 <h3> Use </h3>
@@ -15,6 +19,6 @@ Visit the following URL: http://127.0.0.1:30070/
 To delete the deployment run:
 
 ```bash
-kubectl delete services customer-behavior && kubectl delete deployment customer-behavior
+kubectl delete services customer-behavior && kubectl delete deployment customer-behavior && kubectl delete hpa customer-behavior 
 ```
 

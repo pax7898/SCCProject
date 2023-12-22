@@ -57,8 +57,8 @@ def customers_pipeline():
     # Given the outputs from "linear_regression"
     # the component "show_results" is called to print the results.
     show_results(linear_regression_task.outputs['Mae_Train'], linear_regression_task.outputs['Mae_Test'], linear_regression_task.outputs['Params'],
-                xgboost_regressor_task.outputs['Mae_Train'], xgboost_regressor_task.outputs['Mae_Test'], xgboost_regressor_task.outputs['Params'],
-                neural_regression_task.outputs['Mae_Train'], neural_regression_task.outputs['Mae_Test'], neural_regression_task.outputs['Params'])
+                 xgboost_regressor_task.outputs['Mae_Train'], xgboost_regressor_task.outputs['Mae_Test'], xgboost_regressor_task.outputs['Params'],
+                 neural_regression_task.outputs['Mae_Train'], neural_regression_task.outputs['Mae_Test'], neural_regression_task.outputs['Params'])
 
     evaluate_best_model(linear_regression_task.outputs['Mae_Test'],
                         xgboost_regressor_task.outputs['Mae_Test'],
