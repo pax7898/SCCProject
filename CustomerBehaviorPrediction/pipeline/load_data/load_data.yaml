@@ -1,6 +1,8 @@
 name: Load Data Function
 description: Load data from local dataset
 
+inputs:
+- {name: Dataset, type: String, description: 'Dataset .csv'}
 outputs:
 - {name: RawData, type: LocalPath, description: 'Path where data will be stored.'}
 
@@ -9,6 +11,9 @@ implementation:
     image: pax7898/load_data
     command: [
       python, load_data.py,
+
+      --dataset,
+      {inputPath: Dataset},
 
       --raw_data,
       {outputPath: RawData},

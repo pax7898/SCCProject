@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: customer-pipeline-
-  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-21T12:36:18.388729',
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-22T17:20:46.427811',
     pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
       for Customer Spends predicition.", "name": "Customer Pipeline"}'}
   labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
@@ -161,8 +161,14 @@ spec:
   - name: load-data-function
     container:
       args: []
-      command: [python, load_data.py, --raw_data, /tmp/outputs/RawData/data]
+      command: [python, load_data.py, --dataset, /tmp/inputs/Dataset/data, --raw_data,
+        /tmp/outputs/RawData/data]
       image: pax7898/load_data
+    inputs:
+      artifacts:
+      - name: Dataset
+        path: /tmp/inputs/Dataset/data
+        raw: {data: /data/dataset1.csv}
     outputs:
       artifacts:
       - {name: load-data-function-RawData, path: /tmp/outputs/RawData/data}
@@ -173,10 +179,12 @@ spec:
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Load
           data from local dataset", "implementation": {"container": {"command": ["python",
-          "load_data.py", "--raw_data", {"outputPath": "RawData"}], "image": "pax7898/load_data"}},
-          "name": "Load Data Function", "outputs": [{"description": "Path where data
-          will be stored.", "name": "RawData", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
-          "acee23d1da788f3ae9978d50db928f2f0a2c5450e8bccc91df530113fa39cf5b", "url":
+          "load_data.py", "--dataset", {"inputPath": "Dataset"}, "--raw_data", {"outputPath":
+          "RawData"}], "image": "pax7898/load_data"}}, "inputs": [{"description":
+          "Dataset .csv", "name": "Dataset", "type": "String"}], "name": "Load Data
+          Function", "outputs": [{"description": "Path where data will be stored.",
+          "name": "RawData", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "b40eae5ff76558e782da2c128c061954e252ebe95ef27f93be2d6c02714acb9b", "url":
           "load_data/load_data.yaml"}'}
   - name: neural-regression
     container:

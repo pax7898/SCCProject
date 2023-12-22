@@ -44,7 +44,7 @@ def customers_pipeline():
     neural_regression = kfp.components.load_component_from_file('neural_regression/neural_regression.yaml')
 
     # Run load_data task
-    load_task = load()
+    load_task = load('/pipeline/dataset1.csv')
     # Run preprocess_data task
     preprocess_task = preprocess(load_task.output)
 

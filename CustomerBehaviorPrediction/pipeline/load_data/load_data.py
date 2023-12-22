@@ -11,7 +11,11 @@ from pathlib import Path
 def _load_data(args):
 
     # Gets and split dataset
-    df = pd.read_csv('ecommerce_customers.csv')
+    # df = pd.read_csv('ecommerce_customers.csv')
+    print("DATASET: ", args.dataset)
+
+    df = pd.read_csv(args.dataset)
+    print(df)
     df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
 
     # Crea la struttura dati per salvare e condividere i dataset
@@ -29,6 +33,7 @@ if __name__ == '__main__':
     # This component does not receive any input
     # it only outputs one artifact which is `data`.
     parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str)
     parser.add_argument('--raw_data', type=str)
     
     args = parser.parse_args()
