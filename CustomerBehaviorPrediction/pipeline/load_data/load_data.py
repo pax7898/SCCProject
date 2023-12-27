@@ -13,7 +13,6 @@ def _load_data(args):
     # Training Data
     with open(args.train_set, 'r') as file:
         train_set = file.read()
-        print(train_set)
     train_df = pd.read_csv(train_set)
     train_df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
     train_data = train_df.to_numpy().tolist()
@@ -24,14 +23,12 @@ def _load_data(args):
     # Test Data
     with open(args.test_set, 'r') as file:
         test_set = file.read()
-        print(test_set)
     test_df = pd.read_csv(test_set)
     test_df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
     test_data = test_df.to_numpy().tolist()
     test_data_json = json.dumps(test_data)
     with open(args.test_raw_data, 'w') as out_file:
         json.dump(test_data_json, out_file)
-
 
 if __name__ == '__main__':
     # This component does not receive any input
