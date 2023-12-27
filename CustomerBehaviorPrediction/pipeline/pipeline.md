@@ -1,29 +1,32 @@
-## Pipeline
+## To execute pipeline
+After Kubernetes cluster allocation follow these steps:
+1. ### Install kubeflow on kubernetes cluster
+    Install Kubeflow: The PIPELINE_VERSION environment variable is set, and Kubeflow Pipelines are installed on the Kubernetes cluster using kubectl apply -k. This step deploys all necessary resources for Kubeflow.
 
-### Install kubeflow on kubernetes cluster
-```bash
-export PIPELINE_VERSION=2.0.3
-```
+    ```bash
+    export PIPELINE_VERSION=2.0.3
+    ```
 
-```bash
-kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$PIPELINE_VERSION"
-```
+    ```bash
+    kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/cluster-scoped-resources?ref=$PIPELINE_VERSION"
+    ```
 
-```bash
-kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io
-```
+    Wait for CRD Establishment: The command kubectl wait ensures that the Custom Resource Definitions (CRDs) are established before proceeding.
 
-```bash
-kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/env/platform-agnostic-pns?ref=$PIPELINE_VERSION"
-```
+    ```bash
+    kubectl wait --for condition=established --timeout=60s crd/applications.app.k8s.io
+    ```
 
-### Enable dashboard on localhost
+    ```bash
+    kubectl apply -k "github.com/kubeflow/pipelines/manifests/kustomize/env/platform-agnostic-pns?ref=$PIPELINE_VERSION"
+    ```
 
-```bash
-kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
-```
+3. ### Enable dashboard on localhost
 
-Link to dashboard:
-http://localhost:8080/
+    Dashboard Setup: The kubectl port-forward command forwards a local port to the Kubeflow dashboard service running in the cluster, allowing access to the Kubeflow dashboard via http://localhost:8080/.
 
-### Upload and execute `customers_pipeline.yaml` in kubeflow.
+    ```bash
+    kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
+    ```
+
+4. ### Upload and execute `customers_pipeline.yaml` in kubeflow.
