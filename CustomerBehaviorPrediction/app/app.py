@@ -19,11 +19,9 @@ def inference(row, scaler, model, feat_cols):
     return prediction
 
 
-st.title('Forecast of a customer\'s annual expenses')
+st.title('Predict customer\'s annual expenses')
 st.markdown("""
-            This is an application to find out the customers annual expenses on an e-commerce in one year!
-        
-            Dataset from [Kaggle](https://www.kaggle.com/srolka/ecommerce-customers)
+            Application to find out the customers annual expenses on an e-commerce in one year!
         """)
 
 st.header('Predict New Value')
