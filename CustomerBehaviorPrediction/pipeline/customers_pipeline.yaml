@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
   generateName: customer-pipeline-
-  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-22T17:20:46.427811',
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-12-27T16:00:45.658473',
     pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Linear Regression
       for Customer Spends predicition.", "name": "Customer Pipeline"}'}
   labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
@@ -38,7 +38,8 @@ spec:
         dependencies: [load-data-function]
         arguments:
           artifacts:
-          - {name: load-data-function-RawData, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-RawData}}'}
+          - {name: load-data-function-TestRawData, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-TestRawData}}'}
+          - {name: load-data-function-TrainRawData, from: '{{tasks.load-data-function.outputs.artifacts.load-data-function-TrainRawData}}'}
       - name: show-results
         template: show-results
         dependencies: [linear-regression, neural-regression, xgboost-regressor]
@@ -161,17 +162,22 @@ spec:
   - name: load-data-function
     container:
       args: []
-      command: [python, load_data.py, --dataset, /tmp/inputs/Dataset/data, --raw_data,
-        /tmp/outputs/RawData/data]
+      command: [python, load_data.py, --train_set, /tmp/inputs/TrainSet/data, --test_set,
+        /tmp/inputs/TestSet/data, --train_raw_data, /tmp/outputs/TrainRawData/data,
+        --test_raw_data, /tmp/outputs/TestRawData/data]
       image: pax7898/load_data
     inputs:
       artifacts:
-      - name: Dataset
-        path: /tmp/inputs/Dataset/data
-        raw: {data: /data/dataset1.csv}
+      - name: TestSet
+        path: /tmp/inputs/TestSet/data
+        raw: {data: testset.csv}
+      - name: TrainSet
+        path: /tmp/inputs/TrainSet/data
+        raw: {data: dataset1.csv}
     outputs:
       artifacts:
-      - {name: load-data-function-RawData, path: /tmp/outputs/RawData/data}
+      - {name: load-data-function-TestRawData, path: /tmp/outputs/TestRawData/data}
+      - {name: load-data-function-TrainRawData, path: /tmp/outputs/TrainRawData/data}
     metadata:
       labels:
         pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
@@ -179,13 +185,16 @@ spec:
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Load
           data from local dataset", "implementation": {"container": {"command": ["python",
-          "load_data.py", "--dataset", {"inputPath": "Dataset"}, "--raw_data", {"outputPath":
-          "RawData"}], "image": "pax7898/load_data"}}, "inputs": [{"description":
-          "Dataset .csv", "name": "Dataset", "type": "String"}], "name": "Load Data
-          Function", "outputs": [{"description": "Path where data will be stored.",
-          "name": "RawData", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
-          "b40eae5ff76558e782da2c128c061954e252ebe95ef27f93be2d6c02714acb9b", "url":
-          "load_data/load_data.yaml"}'}
+          "load_data.py", "--train_set", {"inputPath": "TrainSet"}, "--test_set",
+          {"inputPath": "TestSet"}, "--train_raw_data", {"outputPath": "TrainRawData"},
+          "--test_raw_data", {"outputPath": "TestRawData"}], "image": "pax7898/load_data"}},
+          "inputs": [{"description": "Training Set .csv", "name": "TrainSet", "type":
+          "String"}, {"description": "Test Set .csv", "name": "TestSet", "type": "String"}],
+          "name": "Load Data Function", "outputs": [{"description": "Path where train
+          data will be stored.", "name": "TrainRawData", "type": "LocalPath"}, {"description":
+          "Path where test data will be stored.", "name": "TestRawData", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "d7a917e7acc92b265f655c0449e9d8d3152c3b10eee19e82a593a8a4cf07b13f",
+          "url": "load_data/load_data.yaml"}'}
   - name: neural-regression
     container:
       args: []
@@ -228,12 +237,13 @@ spec:
   - name: preprocess-data-function
     container:
       args: []
-      command: [python, preprocess_data.py, --raw_data, /tmp/inputs/RawData/data,
-        --data, /tmp/outputs/Data/data]
+      command: [python, preprocess_data.py, --train_raw_data, /tmp/inputs/TrainRawData/data,
+        --test_raw_data, /tmp/inputs/TestRawData/data, --data, /tmp/outputs/Data/data]
       image: pax7898/preprocess_data
     inputs:
       artifacts:
-      - {name: load-data-function-RawData, path: /tmp/inputs/RawData/data}
+      - {name: load-data-function-TestRawData, path: /tmp/inputs/TestRawData/data}
+      - {name: load-data-function-TrainRawData, path: /tmp/inputs/TrainRawData/data}
     outputs:
       artifacts:
       - {name: preprocess-data-function-Data, path: /tmp/outputs/Data/data}
@@ -244,12 +254,14 @@ spec:
         pipelines.kubeflow.org/enable_caching: "true"
       annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Preprocess
           data from local dataset", "implementation": {"container": {"command": ["python",
-          "preprocess_data.py", "--raw_data", {"inputPath": "RawData"}, "--data",
-          {"outputPath": "Data"}], "image": "pax7898/preprocess_data"}}, "inputs":
-          [{"description": "Path where data is stored.", "name": "RawData", "type":
-          "LocalPath"}], "name": "Preprocess Data Function", "outputs": [{"description":
+          "preprocess_data.py", "--train_raw_data", {"inputPath": "TrainRawData"},
+          "--test_raw_data", {"inputPath": "TestRawData"}, "--data", {"outputPath":
+          "Data"}], "image": "pax7898/preprocess_data"}}, "inputs": [{"description":
+          "Path where train data is stored.", "name": "TrainRawData", "type": "LocalPath"},
+          {"description": "Path where test data is stored.", "name": "TestRawData",
+          "type": "LocalPath"}], "name": "Preprocess Data Function", "outputs": [{"description":
           "Path where preprocessed data will be stored.", "name": "Data", "type":
-          "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest": "b60992e6a4f5883e7dc74d3ae98c4232340881dc06d885f3a4aa1f9d3b1543b9",
+          "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest": "8d4ed05cd11570a613ea06784aba9d957a41e606af67216ee78213a030865cfe",
           "url": "preprocess_data/preprocess_data.yaml"}'}
   - name: show-results
     container:

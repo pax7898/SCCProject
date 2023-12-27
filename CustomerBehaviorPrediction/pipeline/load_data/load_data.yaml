@@ -2,9 +2,12 @@ name: Load Data Function
 description: Load data from local dataset
 
 inputs:
-- {name: Dataset, type: String, description: 'Dataset .csv'}
+- {name: TrainSet, type: String, description: 'Training Set .csv'}
+- {name: TestSet, type: String, description: 'Test Set .csv'}
 outputs:
-- {name: RawData, type: LocalPath, description: 'Path where data will be stored.'}
+- {name: TrainRawData, type: LocalPath, description: 'Path where train data will be stored.'}
+- {name: TestRawData, type: LocalPath, description: 'Path where test data will be stored.'}
+
 
 implementation:
   container:
@@ -12,9 +15,13 @@ implementation:
     command: [
       python, load_data.py,
 
-      --dataset,
-      {inputPath: Dataset},
+      --train_set,
+      {inputPath: TrainSet},
+      --test_set,
+      {inputPath: TestSet},
 
-      --raw_data,
-      {outputPath: RawData},
+      --train_raw_data,
+      {outputPath: TrainRawData},
+      --test_raw_data,
+      {outputPath: TestRawData},
     ]

@@ -9,31 +9,42 @@ from sklearn.impute import SimpleImputer
 # DA INTEGRARE CON customers_pipeline 
 
 def _preprocess_data(args):
-    # Apri e leggi il file JSON creato da load_data.py
-    with open(args.raw_data) as data_file:
-        data_loaded = json.load(data_file)
+    # Apri e leggi i files JSON creato da load_data.py
+    print("Train Raw Data Path:", args.train_raw_data)
+    print("Test Raw Data Path:", args.test_raw_data)
 
-    data = json.loads(data_loaded)
+    with open(args.train_raw_data) as data_file:
+        train_data = json.load(data_file)
+    with open(args.test_raw_data) as data_file:
+        test_data = json.load(data_file)
+
+    train_data_loaded = json.loads(train_data)
+    test_data_loaded = json.loads(test_data)
+
     # Crea un DataFrame per le features e un Series per il target
-    df = pd.DataFrame(data, columns=['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership','Yearly Amount Spent'])
+    train_df = pd.DataFrame(train_data_loaded, columns=['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership','Yearly Amount Spent'])
+    test_df = pd.DataFrame(test_data_loaded, columns=['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership','Yearly Amount Spent'])
 
     # Gestione dei valori mancanti con la mediana
     imputer = SimpleImputer(strategy='median')
-    df = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
+    train_df = pd.DataFrame(imputer.fit_transform(train_df), columns=train_df.columns)
+    test_df = pd.DataFrame(imputer.fit_transform(test_df), columns=test_df.columns)
 
     # Standardizzazione delle features numeriche
     scaler = StandardScaler()
-    numeric_features = df.columns[:-1]  # Escludi l'ultima colonna (la variabile target)
-    df[numeric_features] = scaler.fit_transform(df[numeric_features])
+    numeric_features = train_df.columns[:-1]  # Escludi l'ultima colonna (la variabile target)
+    train_df[numeric_features] = scaler.fit_transform(train_df[numeric_features])
+    test_df[numeric_features] = scaler.fit_transform(test_df[numeric_features])
 
-    # Aumento del dataset (aumento di 200 entries)
-    df_augmented = df.sample(n=200, replace=True, random_state=42)
-    df = pd.concat([df, df_augmented], ignore_index=True)
+    # Aumento del dataset per il training(aumento di 200 entries)
+    train_df_augmented = train_df.sample(n=70, replace=True, random_state=42)
+    train_df = pd.concat([train_df, train_df_augmented], ignore_index=True)
 
-    y = df['Yearly Amount Spent']
-    x = df.drop('Yearly Amount Spent', axis=1)
+    y_train = train_df['Yearly Amount Spent']
+    x_train = train_df.drop('Yearly Amount Spent', axis=1)
+    y_test = test_df['Yearly Amount Spent']
+    x_test = test_df.drop('Yearly Amount Spent', axis=1)
 
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
     x_train, x_test, y_train, y_test = x_train.to_numpy(), x_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()
 
     # Creates `data` structure to save and 
@@ -49,7 +60,8 @@ def _preprocess_data(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--raw_data', type=str)
+    parser.add_argument('--train_raw_data', type=str)
+    parser.add_argument('--test_raw_data', type=str)
     parser.add_argument('--data', type=str)
 
     args = parser.parse_args()

@@ -2,7 +2,8 @@ name: Preprocess Data Function
 description: Preprocess data from local dataset
 
 inputs:
-- {name: RawData, type: LocalPath, description: 'Path where data is stored.'}
+- {name: TrainRawData, type: LocalPath, description: 'Path where train data is stored.'}
+- {name: TestRawData, type: LocalPath, description: 'Path where test data is stored.'}
 outputs:
 - {name: Data, type: LocalPath, description: 'Path where preprocessed data will be stored.'}
 
@@ -12,8 +13,10 @@ implementation:
     command: [
       python, preprocess_data.py,
 
-      --raw_data,
-      {inputPath: RawData},
+      --train_raw_data,
+      {inputPath: TrainRawData},
+      --test_raw_data,
+      {inputPath: TestRawData},
 
       --data,
       {outputPath: Data},
