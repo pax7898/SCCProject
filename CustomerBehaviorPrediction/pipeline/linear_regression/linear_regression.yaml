@@ -3,10 +3,12 @@ description: Train a Linear Regression model
 
 inputs:
 - {name: Data, type: LocalPath, description: 'Path where data is stored.'}
+- {name: Retrain, type: Boolean, description: 'Retrain flag.'}
 outputs:
 - {name: Mae_Train, type: Float, description: 'Mean Absolute Error metric on Training Set'}
 - {name: Mae_Test, type: Float, description: 'Mean Absolute Error metric on Test Set'}
 - {name: Params, type: String, description: 'Best hyperparameters'}
+- {name: Model, type: LocalPath, description: 'Model Dump'}
 
 implementation:
   container:
@@ -16,6 +18,8 @@ implementation:
 
       --data,
       {inputPath: Data},
+      --retrain,
+      {inputPath: Retrain},
 
       --mae_train,
       {outputPath: Mae_Train},
@@ -23,5 +27,7 @@ implementation:
       { outputPath: Mae_Test},
       --params,
       { outputPath: Params },
+      --model,
+      {outputPath: Model},
 
     ]

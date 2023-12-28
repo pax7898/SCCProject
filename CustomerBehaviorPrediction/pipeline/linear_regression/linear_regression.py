@@ -4,11 +4,15 @@ from pathlib import Path
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_absolute_error
+import joblib
 
 def _linear_regression(args):
     # Open and reads file "data"
     with open(args.data) as data_file:
         data = json.load(data_file)
+
+    with open(args.retrain, 'r') as file:
+        retrain = file.read()
 
     # The expected data type is 'dict', however since the file
     # was loaded as a json object, it is first loaded as a string
@@ -22,7 +26,10 @@ def _linear_regression(args):
     y_test = data['y_test']
 
     # Initialize the model
-    model = LinearRegression()
+    if not retrain:
+        model = LinearRegression()
+    else:
+        model = joblib.load("linear_regression.joblib")
 
     # Parameter grid for Linear Regression
     model_param_grid = {
@@ -57,14 +64,19 @@ def _linear_regression(args):
     with open(args.params, 'w') as params_file:
         params_file.write(str(best_params))
 
+    # Save the dump of the best model in a local file
+    joblib.dump(best_model, args.model)
+
 
 if __name__ == '__main__':
     # Defining and parsing the command-line arguments
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
+    parser.add_argument('--retrain', type=bool)
     parser.add_argument('--mae_train', type=str)
     parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)
+    parser.add_argument('--model', type=str)
 
     args = parser.parse_args()
 
@@ -72,5 +84,6 @@ if __name__ == '__main__':
     Path(args.mae_train).parent.mkdir(parents=True, exist_ok=True)
     Path(args.mae_test).parent.mkdir(parents=True, exist_ok=True)
     Path(args.params).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.model).parent.mkdir(parents=True, exist_ok=True)
 
     _linear_regression(args)
