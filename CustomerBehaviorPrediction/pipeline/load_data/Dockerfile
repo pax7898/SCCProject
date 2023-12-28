@@ -5,5 +5,4 @@ RUN pip install -r requirements_ld.txt
 COPY load_data.py /pipeline
 COPY /data/dataset1.csv /pipeline
 COPY /data/dataset2.csv /pipeline
-COPY /data/dataset3.csv /pipeline
 COPY /data/testset.csv /pipeline
