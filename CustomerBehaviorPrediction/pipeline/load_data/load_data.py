@@ -10,8 +10,16 @@ from pathlib import Path
 # - prepara la struttura dati per il preprocessing
 
 def _load_data(args):
+    # Check for retraining
+    with open(args.retrain, 'r') as file:
+        retrain = file.read()
+    if (retrain):
+        trainset=args.train_set
+    else:
+        trainset='dataset1.csv'
+
     # Training Data
-    with open(args.train_set, 'r') as file:
+    with open(trainset, 'r') as file:
         train_set = file.read()
     train_df = pd.read_csv(train_set)
     train_df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
@@ -36,6 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_set', type=str)
     parser.add_argument('--test_set', type=str)
+    parser.add_argument('--retrain', type=bool)
     parser.add_argument('--train_raw_data', type=str)
     parser.add_argument('--test_raw_data', type=str)
 
