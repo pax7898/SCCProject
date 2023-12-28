@@ -4,11 +4,15 @@ from pathlib import Path
 import xgboost as xgb
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_absolute_error
+import joblib
 
 def _xgboost_regressor(args):
     # Apre e legge il file "data"
     with open(args.data) as data_file:
         data = json.load(data_file)
+
+    with open(args.retrain, 'r') as file:
+        retrain = file.read()
 
     # Il tipo di dati atteso è 'dict', tuttavia, poiché il file
     # è stato caricato come un oggetto json, è prima caricato come stringa
@@ -22,7 +26,11 @@ def _xgboost_regressor(args):
     y_test = data['y_test']
 
     # Inizializza e addestra il modello XGBoost Regressor
-    model = xgb.XGBRegressor()
+
+    if not retrain:
+        model = xgb.XGBRegressor()
+    else:
+        model = joblib.load("xgboost_regressor.joblib")
 
     # Parameter grid for XGBoost Regressor
     model_param_grid = {
@@ -57,13 +65,18 @@ def _xgboost_regressor(args):
     with open(args.params, 'w') as params_file:
         params_file.write(str(best_params))
 
+    # Save the dump of the best model in a local file
+    joblib.dump(best_model, args.model)
+
 if __name__ == '__main__':
     # Definizione e analisi degli argomenti da riga di comando
     parser = argparse.ArgumentParser(description='Descrizione del mio programma')
     parser.add_argument('--data', type=str)
+    parser.add_argument('--retrain', type=bool)
     parser.add_argument('--mae_train', type=str)
     parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)
+    parser.add_argument('--model', type=str)
 
     args = parser.parse_args()
 
@@ -71,5 +84,6 @@ if __name__ == '__main__':
     Path(args.mae_train).parent.mkdir(parents=True, exist_ok=True)
     Path(args.mae_test).parent.mkdir(parents=True, exist_ok=True)
     Path(args.params).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.model).parent.mkdir(parents=True, exist_ok=True)
 
     _xgboost_regressor(args)

@@ -4,11 +4,15 @@ from pathlib import Path
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import GridSearchCV
+import joblib
 
 def _neural_regression(args):
     # Apri e leggi il file "data"
     with open(args.data) as data_file:
         data = json.load(data_file)
+
+    with open(args.retrain, 'r') as file:
+        retrain = file.read()
 
     # Il tipo di dati atteso è 'dict', tuttavia, poiché il file
     # è stato caricato come un oggetto json, è prima caricato come stringa
@@ -22,7 +26,11 @@ def _neural_regression(args):
     y_test = data['y_test']
 
     # Inizializza il modello di regressione neurale (MLPRegressor)
-    model = MLPRegressor(max_iter=500)
+    if not retrain:
+        model = MLPRegressor(max_iter=500)
+    else:
+        model = joblib.load("neural_regression.joblib")
+
 
     # Parametri per la grid search
     model_param_grid = {
@@ -57,13 +65,18 @@ def _neural_regression(args):
     with open(args.params, 'w') as params_file:
         params_file.write(str(best_params))
 
+    # Save the dump of the best model in a local file
+    joblib.dump(best_model, args.model)
+
 if __name__ == '__main__':
     # Definizione e analisi degli argomenti da riga di comando
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
+    parser.add_argument('--retrain', type=bool)
     parser.add_argument('--mae_train', type=str)
     parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)
+    parser.add_argument('--model', type=str)
 
     args = parser.parse_args()
 
@@ -71,5 +84,6 @@ if __name__ == '__main__':
     Path(args.mae_train).parent.mkdir(parents=True, exist_ok=True)
     Path(args.mae_test).parent.mkdir(parents=True, exist_ok=True)
     Path(args.params).parent.mkdir(parents=True, exist_ok=True)
+    Path(args.model).parent.mkdir(parents=True, exist_ok=True)
 
     _neural_regression(args)
