@@ -4,20 +4,19 @@ from pathlib import Path
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_absolute_error
-import joblib
+from joblib import dump, load
+
 
 def _linear_regression(args):
     # Open and reads file "data"
     with open(args.data) as data_file:
         data = json.load(data_file)
 
+    # Open and reads flag "retrain"
     with open(args.retrain, 'r') as file:
         retrain = file.read()
 
-    # The expected data type is 'dict', however since the file
-    # was loaded as a json object, it is first loaded as a string
-    # thus we need to load again from such string in order to get 
-    # the dict-type object.
+    # Load of the data dict from the json string
     data = json.loads(data)
 
     x_train = data['x_train']
@@ -25,27 +24,29 @@ def _linear_regression(args):
     x_test = data['x_test']
     y_test = data['y_test']
 
-    # Initialize the model
     if retrain:
+        # Initialize the model for the first training
         model = LinearRegression()
     else:
-        model = joblib.load("linear_regression.joblib")
+        # Load the previous model for the retraining
+        model = load("linear_regression.joblib")
 
     # Parameter grid for Linear Regression
     model_param_grid = {
         'fit_intercept': [True, False],
         'positive': [True, False],
         'copy_X': [True, False],
-        'n_jobs': [None, -1],  # -1 utilizza tutti i processori disponibili
+        'n_jobs': [None, -1],
     }
 
-    # Perform GridSearch
+    # GridSearch Training
     grid = GridSearchCV(model, model_param_grid, cv=3, scoring='neg_mean_absolute_error', n_jobs=-1)
     grid.fit(x_train, y_train)
 
     best_model = grid.best_estimator_
     best_params = str(grid.best_params_)
 
+    # Mean Absolute Error Validation
     y_pred_train = best_model.predict(x_train)
     y_pred_test = best_model.predict(x_test)
 
@@ -65,7 +66,7 @@ def _linear_regression(args):
         params_file.write(str(best_params))
 
     # Save the dump of the best model in a local file
-    joblib.dump(best_model, args.model)
+    dump(best_model, args.model)
 
 
 if __name__ == '__main__':
@@ -80,7 +81,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Creazione della directory in cui verrà creato il file di output (la directory potrebbe o potrebbe non esistere).
+    # Creating the directory where the output file will be created
+    # (the directory may or may not exist).
     Path(args.mae_train).parent.mkdir(parents=True, exist_ok=True)
     Path(args.mae_test).parent.mkdir(parents=True, exist_ok=True)
     Path(args.params).parent.mkdir(parents=True, exist_ok=True)

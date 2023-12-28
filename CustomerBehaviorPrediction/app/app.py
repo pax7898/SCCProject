@@ -26,13 +26,14 @@ st.markdown("""
 
 st.header('Predict New Value')
 avg_session_length = st.slider('Average Session Length (Minutes)', 0, 90, 1)
-time_app = st.slider('Time on App (Days)', 0, 90, 1)
-time_web = st.slider('Time on Web (Days)', 0, 90, 1)
+time_app = st.slider('Time on App (Minutes)', 0, 90, 1)
+time_web = st.slider('Time on Web (Minutes)', 0, 90, 1)
 length_member = st.slider('Length of Membership (Years)', 0, 10, 1)
 
 row = [avg_session_length, time_app, time_web, length_member]
 feat_cols = ['Avg. Session Length', 'Time on App', 'Time on Website', 'Length of Membership']
-sc, model = load('models/data_scaler.joblib',
+
+sc, model = load('models/scaler.joblib',
                  'models/model.joblib')
 
 result = inference(row, sc, model, feat_cols)[0]

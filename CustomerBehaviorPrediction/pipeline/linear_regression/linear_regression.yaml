@@ -8,7 +8,7 @@ outputs:
 - {name: Mae_Train, type: Float, description: 'Mean Absolute Error metric on Training Set'}
 - {name: Mae_Test, type: Float, description: 'Mean Absolute Error metric on Test Set'}
 - {name: Params, type: String, description: 'Best hyperparameters'}
-- {name: Model, type: LocalPath, description: 'Model Dump'}
+- {name: Model, type: LocalPath, description: 'Path where the model dump will be stored'}
 
 implementation:
   container:

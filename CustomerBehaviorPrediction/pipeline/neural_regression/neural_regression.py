@@ -4,20 +4,19 @@ from pathlib import Path
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import GridSearchCV
-import joblib
+from joblib import dump, load
+
 
 def _neural_regression(args):
-    # Apri e leggi il file "data"
+    # Open and reads file "data"
     with open(args.data) as data_file:
         data = json.load(data_file)
 
+    # Open and reads flag "retrain"
     with open(args.retrain, 'r') as file:
         retrain = file.read()
 
-    # Il tipo di dati atteso è 'dict', tuttavia, poiché il file
-    # è stato caricato come un oggetto json, è prima caricato come stringa
-    # quindi dobbiamo caricare nuovamente da tale stringa per ottenere
-    # l'oggetto di tipo dict.
+    # Load of the data dict from the json string
     data = json.loads(data)
 
     x_train = data['x_train']
@@ -25,14 +24,14 @@ def _neural_regression(args):
     x_test = data['x_test']
     y_test = data['y_test']
 
-    # Inizializza il modello di regressione neurale (MLPRegressor)
     if retrain:
+        # Initialize the model for the first training
         model = MLPRegressor(max_iter=500)
     else:
-        model = joblib.load("neural_regression.joblib")
+        # Load the previous model for the retraining
+        model = load("neural_regression.joblib")
 
-
-    # Parametri per la grid search
+    # Parameter grid for Neural Regression
     model_param_grid = {
         'hidden_layer_sizes': [(50,), (100,), (50, 50), (100, 50, 100)],
         'activation': ['relu', 'tanh', 'logistic'],
@@ -40,13 +39,14 @@ def _neural_regression(args):
         'learning_rate': ['constant', 'invscaling', 'adaptive']
     }
 
-    # Esegui la grid search
+    # GridSearch Training
     grid = GridSearchCV(model, model_param_grid, cv=3, scoring='neg_mean_absolute_error', n_jobs=-1)
     grid.fit(x_train, y_train)
 
     best_model = grid.best_estimator_
     best_params = str(grid.best_params_)
 
+    # Mean Absolute Error Validation
     y_pred_train = best_model.predict(x_train)
     y_pred_test = best_model.predict(x_test)
 
@@ -66,10 +66,11 @@ def _neural_regression(args):
         params_file.write(str(best_params))
 
     # Save the dump of the best model in a local file
-    joblib.dump(best_model, args.model)
+    dump(best_model, args.model)
+
 
 if __name__ == '__main__':
-    # Definizione e analisi degli argomenti da riga di comando
+    # Defining and parsing the command-line arguments
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
     parser.add_argument('--retrain', type=str)
@@ -80,7 +81,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # Creazione della directory in cui verrà creato il file di output (la directory potrebbe o potrebbe non esistere).
+    # Creating the directory where the output file will be created
+    # (the directory may or may not exist).
     Path(args.mae_train).parent.mkdir(parents=True, exist_ok=True)
     Path(args.mae_test).parent.mkdir(parents=True, exist_ok=True)
     Path(args.params).parent.mkdir(parents=True, exist_ok=True)

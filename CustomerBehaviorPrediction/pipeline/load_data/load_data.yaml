@@ -2,13 +2,12 @@ name: Load Data Function
 description: Load data from local dataset
 
 inputs:
-- {name: TrainSet, type: String, description: 'Training Set .csv'}
-- {name: TestSet, type: String, description: 'Test Set .csv'}
-- {name: Retrain, type: Boolean, description: 'Retrain True or False'}
+- {name: TrainSet, type: String, description: 'Training set csv file'}
+- {name: TestSet, type: String, description: 'Test set csv file'}
+- {name: Retrain, type: Boolean, description: 'Retrain flag'}
 outputs:
 - {name: TrainRawData, type: LocalPath, description: 'Path where train data will be stored.'}
 - {name: TestRawData, type: LocalPath, description: 'Path where test data will be stored.'}
-
 
 implementation:
   container:

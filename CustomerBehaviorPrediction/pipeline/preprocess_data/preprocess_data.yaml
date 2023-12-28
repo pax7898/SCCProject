@@ -6,6 +6,7 @@ inputs:
 - {name: TestRawData, type: LocalPath, description: 'Path where test data is stored.'}
 outputs:
 - {name: Data, type: LocalPath, description: 'Path where preprocessed data will be stored.'}
+- {name: Scaler, type: LocalPath, description: 'Path where the scaler dump will be stored.'}
 
 implementation:
   container:
@@ -20,4 +21,6 @@ implementation:
 
       --data,
       {outputPath: Data},
+      --scaler,
+      { outputPath: Scaler },
     ]

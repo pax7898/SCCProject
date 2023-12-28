@@ -4,22 +4,24 @@ import pandas as pd
 from pathlib import Path
 
 
-# Load Data component:
-# - carica i dati da file esterni
-# - rimuove feature non rilevanti 
-# - prepara la struttura dati per il preprocessing
-
 def _load_data(args):
+
     # Check for retraining
     with open(args.retrain, 'r') as file:
         retrain = file.read()
-    if (retrain):
-        trainset=args.train_set
-    else:
-        trainset='dataset1.csv'
 
-    # Training Data
-    with open(trainset, 'r') as file:
+    if retrain:
+        train_set_path = args.train_set
+    else:
+        train_set_path = 'dataset1.csv'
+
+    # Load Data component operation:
+    # - Loading data from .csv files
+    # - Removing irrelevant features
+    # - Preparing data for preprocessing
+
+    # Train Data
+    with open(train_set_path, 'r') as file:
         train_set = file.read()
     train_df = pd.read_csv(train_set)
     train_df.drop(['Email', 'Address', 'Avatar'], axis=1, inplace=True)
@@ -38,9 +40,9 @@ def _load_data(args):
     with open(args.test_raw_data, 'w') as out_file:
         json.dump(test_data_json, out_file)
 
+
 if __name__ == '__main__':
-    # This component does not receive any input
-    # it only outputs one artifact which is `data`.
+    # Defining and parsing the command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_set', type=str)
     parser.add_argument('--test_set', type=str)
