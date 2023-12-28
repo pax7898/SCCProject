@@ -27,7 +27,7 @@ def _xgboost_regressor(args):
 
     # Inizializza e addestra il modello XGBoost Regressor
 
-    if not retrain:
+    if retrain:
         model = xgb.XGBRegressor()
     else:
         model = joblib.load("xgboost_regressor.joblib")
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Definizione e analisi degli argomenti da riga di comando
     parser = argparse.ArgumentParser(description='Descrizione del mio programma')
     parser.add_argument('--data', type=str)
-    parser.add_argument('--retrain', type=bool)
+    parser.add_argument('--retrain', type=str)
     parser.add_argument('--mae_train', type=str)
     parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)

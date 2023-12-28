@@ -26,7 +26,7 @@ def _linear_regression(args):
     y_test = data['y_test']
 
     # Initialize the model
-    if not retrain:
+    if retrain:
         model = LinearRegression()
     else:
         model = joblib.load("linear_regression.joblib")
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Defining and parsing the command-line arguments
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
-    parser.add_argument('--retrain', type=bool)
+    parser.add_argument('--retrain', type=str)
     parser.add_argument('--mae_train', type=str)
     parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)

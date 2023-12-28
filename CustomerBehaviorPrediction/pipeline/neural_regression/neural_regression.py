@@ -26,7 +26,7 @@ def _neural_regression(args):
     y_test = data['y_test']
 
     # Inizializza il modello di regressione neurale (MLPRegressor)
-    if not retrain:
+    if retrain:
         model = MLPRegressor(max_iter=500)
     else:
         model = joblib.load("neural_regression.joblib")
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Definizione e analisi degli argomenti da riga di comando
     parser = argparse.ArgumentParser(description='My program description')
     parser.add_argument('--data', type=str)
-    parser.add_argument('--retrain', type=bool)
+    parser.add_argument('--retrain', type=str)
     parser.add_argument('--mae_train', type=str)
     parser.add_argument('--mae_test', type=str)
     parser.add_argument('--params', type=str)

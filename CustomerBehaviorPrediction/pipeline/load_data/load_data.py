@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_set', type=str)
     parser.add_argument('--test_set', type=str)
-    parser.add_argument('--retrain', type=bool)
+    parser.add_argument('--retrain', type=str)
     parser.add_argument('--train_raw_data', type=str)
     parser.add_argument('--test_raw_data', type=str)
 
