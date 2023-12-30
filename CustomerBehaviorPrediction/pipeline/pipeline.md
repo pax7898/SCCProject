@@ -29,4 +29,4 @@ After Kubernetes cluster allocation follow these steps:
     kubectl port-forward -n kubeflow svc/ml-pipeline-ui 8080:80
     ```
 
-4. ### Upload and execute `customers_pipeline.yaml` in kubeflow.
+4. ### Upload and execute `customers_pipeline.yaml` in kubeflow dashboard.

@@ -2,7 +2,14 @@
 
 <h3>Cluster Configuration</h3>
 
-Open terminal window and move inside the directory **/CustomerBehaviorPrediction** e run:
+Run:
 ```bash
 kind create cluster --config=cluster_config.yaml
+```
+
+<h3>Metric-Server Configuration</h3>
+
+Run:
+```bash
+kind create --filename metric-server.yaml
 ```

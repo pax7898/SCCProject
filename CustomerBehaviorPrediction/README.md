@@ -17,7 +17,7 @@ All'interno della directory `/app` sono presenti:
 
   - `app.py`: codice dell'applicazione web 
   - `Dockerfile`: dockerfile per la creazione del container dell'applicazione
-  - `k8s_customer_behavior_deployment.yaml`: file per la configurazione dei pods relativi all'applicazione nel cluster 
+  - `k8s_customer_behavior_deployment.yaml`: file per la configurazione dei pods relativi all'applicazione nel cluster (Deployment & Service)
   - `requirements.txt`: librerie python necessarie all'esecuzione dell'applicazione che verranno inserite nel container
   - `/model`: directory in cui sono contenuti lo scaler e il modello utilizzati dall'applicazione
 
@@ -25,15 +25,15 @@ All'interno della directory `/app` sono presenti:
 - File aggiuntivi di utilità:
 
   - `deployment.md`: file che illustra come effettuare il deployment e il run dell'applicazione sul cluster
-  - `create_models.py`: file per la generazione del modello, individuato mediante la pipeline kubeflow, e dello scaler nella cartella /models
   - `docker_hub.sh`: script per la creazione del container dell'applicazione e per il push dell'immagine su docker hub
 
 <h3> Cluster </h3>
 
 All'interno della directory `/cluster` sono presenti:
 
-- `cluster_config.py`: file di configurazione del cluster Kubernetes
-- `cluster.md`: file che illustra come effettuare il setup del cluster e come attivare e accedere alla dashboard
+- `cluster_config.yaml`: file di configurazione del cluster Kubernetes
+- `metric-server.yaml`: file di configurazione del metric-server
+- `cluster.md`: file che illustra come effettuare il setup del cluster e come installare il metric-server
 
 <h3> Pipeline </h3>
 

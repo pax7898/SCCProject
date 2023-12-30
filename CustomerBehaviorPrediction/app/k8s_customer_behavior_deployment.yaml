@@ -6,7 +6,7 @@ metadata:
     app: customer-behavior-app
   namespace: default
 spec:
-  replicas: 2
+  replicas: 10
   selector:
     matchLabels:
       app: customer-behavior-app
@@ -18,6 +18,12 @@ spec:
       containers:
       - name: customer-behavior
         image: pax7898/customer_behavior
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "256Mi"
+
+
 ---
 apiVersion: v1
 # Indicates this as a service
@@ -27,7 +33,7 @@ metadata:
   name: customer-behavior
   namespace: default
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     # Selector for Pods
     app: customer-behavior-app
