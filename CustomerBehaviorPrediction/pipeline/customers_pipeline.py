@@ -14,11 +14,11 @@ def show_results(lr_mae_train: float, lr_mae_test: float, lr_params: str,
     print(f"Linear Regression Best Parameters: {lr_params}\n")
 
     print(f"XGBoost Regressor (mean absolute error)  on Training Set: {xgb_mae_train}")
-    print(f"Linear Regression (mean absolute error) on Test Set: {xgb_mae_test}")
+    print(f"XGBoost Regressor (mean absolute error) on Test Set: {xgb_mae_test}")
     print(f"XGBoost Regressor Best Parameters: {xgb_params}\n")
 
     print(f"Neural Network Regression (mean absolute error)  on Training Set: {neural_mae_train}")
-    print(f"Linear Regression (mean absolute error) on Test Set: {neural_mae_test}")
+    print(f"Neural Network (mean absolute error) on Test Set: {neural_mae_test}")
     print(f"Neural Network Regression Best Parameters: {neural_params}\n")
 
 
