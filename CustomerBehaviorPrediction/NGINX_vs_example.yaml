@@ -1,0 +1,20 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer 
+metadata:
+  name: customer-behavior-vs 
+spec:
+  host: customer-behavior.example.com
+  policies:
+  - name: waf-policy-prime 
+  tls:
+    secret: app-secret 
+  upstreams:
+  - name: customer-behavior 
+    service: customer-behavior 
+    port: 8501
+  routes:
+  - path: / 
+    action:
+      pass: customer-behavior
+
+   

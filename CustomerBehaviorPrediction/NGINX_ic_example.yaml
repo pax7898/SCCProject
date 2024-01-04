@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/vi
+kind: Ingress 
+metadata:
+  name: customer-behavior
+  annotations:
+    appprotect.f5.com/app-protect-enable: "True"
+spec:
+  ingressClassName: nginx 
+  rules:
+    - host: "customer-behavior.nginx.marketing" 
+      http:
+        paths:
+          - backend:
+              service:
+                name: customer-behavior
+                port:
+                  number: 30070
+            path: / 
+            pathType: Prefix
+
