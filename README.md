@@ -1,10 +1,10 @@
 <h2> Project Work: Customer Behavior Prediction</h2>
 
-Il progetto prevede la realizzazione di una wep app per la previsione delle spese annue future dei clienti di un servizio di e-commerce.
+The project involves the development of a web app for predicting the future annual expenses of customers using an e-commerce service.
 
-Il training e il testing del modello di ML è stato effettuato mediante una pipeline Kubeflow.
+The training and testing of the ML model were carried out using a Kubeflow pipeline.
 
-In particolare il codice all'interno della directory corrente CustomerBehaviorPrediction è diviso in quattro sotto directory:
+In particular, the code within the current directory "CustomerBehaviorPrediction" is divided into four subdirectories:
 
 - `/app`
 - `/cluster`
@@ -13,41 +13,41 @@ In particolare il codice all'interno della directory corrente CustomerBehaviorPr
 
 <h3> App </h3>
 
-All'interno della directory `/app` sono presenti:
+Within the `/app` directory, the following items are present:
 
-- `app.py`: codice dell'applicazione web 
-- `Dockerfile`: dockerfile per la creazione del container dell'applicazione
-- `k8s_customer_behavior_deployment.yaml`: file per la configurazione dei pods relativi all'applicazione nel cluster (Deployment & Service)
-- `requirements.txt`: librerie python necessarie all'esecuzione dell'applicazione che verranno inserite nel container
-- `/model`: directory in cui sono contenuti lo scaler e il modello utilizzati dall'applicazione
-- `deployment.md`: file che illustra come effettuare il deployment e il run dell'applicazione sul cluster
-- `docker_hub.sh`: script per la creazione del container dell'applicazione e per il push dell'immagine su docker hub
+- `app.py`: code for the web application
+- `Dockerfile`: Dockerfile for creating the application container
+- `k8s_customer_behavior_deployment.yaml`: file for configuring the pods related to the application in the cluster (Deployment & Service)
+- `requirements.txt`: Python libraries required for running the application, which will be included in the container
+- `/model`: directory containing the scaler and model used by the application
+- `deployment.md`: file explaining how to deploy and run the application on the cluster
+- `docker_hub.sh`: script for creating the application container and pushing the image to Docker Hub
 
 <h3> Cluster </h3>
 
-All'interno della directory `/cluster` sono presenti:
+Within the `/cluster` directory, the following items are present:
 
-- `cluster_config.yaml`: file di configurazione del cluster Kubernetes
-- `metric-server.yaml`: file di configurazione del metric-server
-- `cluster.md`: file che illustra come effettuare il setup del cluster e come installare il metric-server
+- `cluster_config.yaml`: Kubernetes cluster configuration file
+- `metric-server.yaml`: metric-server configuration file
+- `cluster.md`: file explaining how to set up the cluster and install the metric-server
 
 <h3> Pipeline </h3>
 
-All'interno della directory `/pipeline` sono presenti:
+Within the `/pipeline` directory, the following items are present:
 
-- `/load_data`: Component che si occupa del load del dataset per il training
-- `/preprocess_data`: Component che si occupa del preprocessing dei dati
-- `/linear_regression`: Component che si occupa del training e testing del modello Linear Regression
-- `/xgboost_regressor`: Component che si occupa del training e testing del modello XGBoost Regressor
-- `/neural_regression`: Component che si occupa del training e testing del modello MLP
-- `customer_pipeline.py`: file per la generazione del file .yaml della pipeline kubeflow (contiene anche la definizione dei component show_result e evaluate_best_model)
-- `customer_pipeline.yaml`: file .yaml della pipeline da inserire in kubeflow
-- `docker_hub.sh`: script per la creazione dei container dei vari component e per il push delle immagini su docker hub
-- `pipeline.md`: file che illustra come installare kubeflow sul kubernetes cluster ed importare la pipeline
+- `/load_data`: Component responsible for loading the dataset for training
+- `/preprocess_data`: Component responsible for data preprocessing
+- `/linear_regression`: Component responsible for training and testing the Linear Regression model
+- `/xgboost_regressor`: Component responsible for training and testing the XGBoost Regressor model
+- `/neural_regression`: Component responsible for training and testing the MLP model
+- `customer_pipeline.py`: file for generating the kubeflow pipeline YAML file (also contains the definition of the show_result and evaluate_best_model components)
+- `customer_pipeline.yaml`: kubeflow pipeline YAML file to be inserted into kubeflow
+- `docker_hub.sh`: script for creating containers for various components and pushing images to Docker Hub
+- `pipeline.md`: file explaining how to install Kubeflow on the Kubernetes cluster and import the pipeline
 
 <h3> NGINX_example </h3>
 
-All'interno della directory `/NGINX_example` sono presenti:
+Within the `/NGINX_example` directory, the following items are present:
 
-- `IngressController.yaml`: file di configurazione dell'ingress controller per il Web App Firewall
-- `VirtualServer.yaml`: file di configurazione del virtual server del Web App Firewall
+- `IngressController.yaml`: configuration file for the Ingress Controller for the Web App Firewall
+- `VirtualServer.yaml`: configuration file for the virtual server of the Web App Firewall
