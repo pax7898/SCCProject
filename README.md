@@ -4,11 +4,12 @@ Il progetto prevede la realizzazione di una wep app per la previsione delle spes
 
 Il training e il testing del modello di ML è stato effettuato mediante una pipeline Kubeflow.
 
-In particolare il codice all'interno della directory corrente CustomerBehaviorPrediction è diviso in tre sotto directory:
+In particolare il codice all'interno della directory corrente CustomerBehaviorPrediction è diviso in quattro sotto directory:
 
 - `/app`
-- `/pipeline`
+- `/NGINX_example`
 - `/cluster`
+- `/pipeline`
 
 <h3> App </h3>
 
@@ -34,6 +35,13 @@ All'interno della directory `/cluster` sono presenti:
 - `cluster_config.yaml`: file di configurazione del cluster Kubernetes
 - `metric-server.yaml`: file di configurazione del metric-server
 - `cluster.md`: file che illustra come effettuare il setup del cluster e come installare il metric-server
+
+<h3> NGINX_example </h3>
+
+All'interno della directory `/NGINX_example` sono presenti:
+
+- `IngressController.yaml`: file di configurazione dell'ingress controller per il Web App Firewall
+- `VirtualServer.yaml`: file di configurazione del virtual server del Web App Firewall
 
 <h3> Pipeline </h3>
 
