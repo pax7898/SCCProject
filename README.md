@@ -7,9 +7,9 @@ Il training e il testing del modello di ML è stato effettuato mediante una pipe
 In particolare il codice all'interno della directory corrente CustomerBehaviorPrediction è diviso in quattro sotto directory:
 
 - `/app`
-- `/NGINX_example`
 - `/cluster`
 - `/pipeline`
+- `/NGINX_example`
 
 <h3> App </h3>
 
